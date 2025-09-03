@@ -12,6 +12,9 @@
       --card-radius: 14px;
       /* Lighter site BG so everything feels brighter from the start */
       --bg-start:#900000; --bg-end:#900000;
+        /* easy one-knob control for size */
+  --fire-size: clamp(84px, 14vh, 132px);     /* was ~48–72px */
+  --fire-icon: clamp(26px, 5vh, 34px);       /* bigger emoji/icon */
     }
     html,body{height:100%;margin:0}
     body{
@@ -228,8 +231,8 @@
  /* Fire button */
 .mc-btn {
   pointer-events: auto;
-  width: clamp(48px, 8vh, 72px);
-  height: clamp(48px, 8vh, 72px);
+ width: var(--fire-size);
+  height: var(--fire-size);
   border-radius: 50%;
   position: relative;
   border: 1px solid rgba(0,0,0,.15);
@@ -396,93 +399,174 @@
 @media (prefers-reduced-motion: reduce) {
   .menu3d, .menu3d * { transition: none !important; }
 }
+.customize{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(110px,1fr));
+  gap:8px;
+  width:100%;
+  max-width:520px;
+  margin:6px auto 12px;
+  transform:translateZ(14px);
+}
+.custom-label{
+  display:grid;
+  gap:4px;
+  font-size:11px;
+  color:#94a3b8;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.custom-label select{
+  background:linear-gradient(180deg,#1f2937,#0f172a);
+  color:#e5e7eb;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  padding:6px 8px;
+  font-weight:700;
+  font-size:12px;
+}
+.custom-label{
+  font-size: 13px;     /* was 11 */
+}
+.custom-label select{
+  font-size: 14px;     /* was 12 */
+  padding: 8px 10px;   /* a hair larger */
+}
 
   </style>
+  <style>
+  /* Make select text bigger */
+  #playerFlagSel, #enemyFlagSel {
+    font-size:14px;       /* 🔥 Bigger flags & labels */
+    line-height: 1.6;
+    padding: 6px 10px;
+  }
+
+  /* Make dropdown options bigger */
+  #playerFlagSel option,
+  #enemyFlagSel option {
+    font-size: 22px;       /* 🔥 Larger inside the dropdown */
+    line-height: 1.8;
+  }
+</style>
 </head>
 <body>
-  <div id="game-container">
-    <canvas id="game-canvas"></canvas>
+ <div id="game-container">
+  <canvas id="game-canvas"></canvas>
 
-    <!-- HUD -->
-    <div id="hud" class="glass ui-strong ui-outline">
-      <div class="row">
-        <div class="stat">Score: <span id="score">0</span></div>
-        <div class="stat">Kills: <span id="kills">0</span></div>
-        <div class="stat">Level: <span id="level">1</span></div>
-        <div class="stat">HP: <span id="hp">50</span></div>
-        <div class="stat visually-hidden">Mode: <span id="modeLabel">Easy 1</span></div>
-      </div>
-      <div class="row visually-hidden">
-        <div class="stat">Coins: <span id="coins">0</span></div>
-        <div class="stat">Enemies: <span id="enemies">0</span></div>
-      </div>
+  <!-- HUD -->
+  <div id="hud" class="glass ui-strong ui-outline">
+    <div class="row">
+      <div class="stat">Score: <span id="score">0</span></div>
+      <div class="stat">Kills: <span id="kills">0</span></div>
+      <div class="stat">Level: <span id="level">1</span></div>
+      <div class="stat">HP: <span id="hp">50</span></div>
+      <div class="stat visually-hidden">Mode: <span id="modeLabel">Easy 1</span></div>
     </div>
-
-    <!-- Top Controls -->
-    <div id="controls" class="glass">
-      <button id="menuBtn" class="btn" aria-pressed="false">☰</button>
-      <button id="restartBtn" class="btn">↻</button>
-      <button id="muteBtn" class="btn" aria-pressed="false">🔈</button>
-      <input id="vol" type="range" min="0" max="1" step="0.01" value="0.7" title="Volume">
+    <div class="row visually-hidden">
+      <div class="stat">Coins: <span id="coins">0</span></div>
+      <div class="stat">Enemies: <span id="enemies">0</span></div>
     </div>
+  </div>
 
-    <!-- Overlay -->
-    <div id="overlay">
-      <div class="box glass">
-     <div class="box glass menu3d" data-tilt>
-  <div class="menu3d-inner">
-    <h1 id="overlayTitle" class="ui-strong">Car Fire Combat</h1>
+  <!-- Top Controls -->
+  <div id="controls" class="glass">
+    <button id="menuBtn" class="btn" aria-pressed="false">☰</button>
+    <button id="restartBtn" class="btn">↻</button>
+    <button id="muteBtn" class="btn" aria-pressed="false">🔈</button>
+    <input id="vol" type="range" min="0" max="1" step="0.01" value="0.7" title="Volume">
+  </div>
 
-    <div id="startPanel">
-      <p class="ui-outline">Choose difficulty, then click Start.</p>
+  <!-- Overlay -->
+  <div id="overlay">
+    <div class="box glass">
+      <div class="box glass menu3d" data-tilt>
+        <div class="menu3d-inner">
+          <h1 id="overlayTitle" class="ui-strong">Car Fire Combat</h1>
 
-      <div id="diffRow" class="tiles3d">
-        <button class="choice tile3d active" data-mode="Easy 1"><span>Easy 1</span></button>
-        <button class="choice tile3d" data-mode="Easy 2"><span>Easy 2</span></button>
-        <button class="choice tile3d" data-mode="Easy 3"><span>Easy 3</span></button>
-        <button class="choice tile3d" data-mode="Medium"><span>Medium</span></button>
-        <button class="choice tile3d" data-mode="Hard"><span>Hard</span></button>
+          <div id="startPanel">
+            <p class="ui-outline">Choose difficulty, customize, then click Start.</p>
+
+            <!-- ✅ NEW: Customize row -->
+            <div id="customizeRow" class="customize">
+              <label class="custom-label">
+                <span>Player Flag</span>
+                <select id="playerFlagSel"></select>
+              </label>
+
+              <label class="custom-label">
+                <span>Enemy Flag</span>
+                <select id="enemyFlagSel"></select>
+              </label>
+
+              <label class="custom-label">
+                <span>Enemy Spawn From</span>
+                <select id="enemySpawnSel">
+                  <option value="random">Random</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </label>
+            </div>
+            <!-- /Customize row -->
+
+            <div id="diffRow" class="tiles3d">
+              <button class="choice tile3d active" data-mode="Easy 1"><span>Easy 1</span></button>
+              <button class="choice tile3d" data-mode="Easy 2"><span>Easy 2</span></button>
+              <button class="choice tile3d" data-mode="Easy 3"><span>Easy 3</span></button>
+              <button class="choice tile3d" data-mode="Medium"><span>Medium</span></button>
+              <button class="choice tile3d" data-mode="Hard"><span>Hard</span></button>
+            </div>
+
+            <div class="actions">
+              <button id="startBtn" class="btn cta3d"><span>▶ Start</span></button>
+            </div>
+          </div>
+
+          <div id="pausePanel" style="display:none">
+            <p id="overlayInfo" class="ui-outline">Resume or Restart the game.</p>
+            <div class="actions">
+              <button id="resumeBtn" class="btn tile3d"><span>▶ Resume</span></button>
+              <button id="overlayRestartBtn" class="btn tile3d"><span>↻ Restart</span></button>
+              <button id="overlayMuteBtn" class="btn tile3d"><span>🔈 Toggle Sound</span></button>
+            </div>
+          </div>
+
+          <div id="gameOverPanel" style="display:none">
+            <p id="gameOverInfo" class="ui-outline">You died.</p>
+            <div class="actions">
+              <button id="goRestartBtn" class="btn cta3d"><span>↻ Restart</span></button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="actions">
-        <button id="startBtn" class="btn cta3d"><span>▶ Start</span></button>
-      </div>
     </div>
+  </div>
 
-    <div id="pausePanel" style="display:none">
-      <p id="overlayInfo" class="ui-outline">Resume or Restart the game.</p>
-      <div class="actions">
-        <button id="resumeBtn" class="btn tile3d"><span>▶ Resume</span></button>
-        <button id="overlayRestartBtn" class="btn tile3d"><span>↻ Restart</span></button>
-        <button id="overlayMuteBtn" class="btn tile3d"><span>🔈 Toggle Sound</span></button>
-      </div>
-    </div>
+  <!-- Floating Glass Joystick (appears wherever you touch left side) -->
+  <div id="joy" class="hidden">
+    <div id="joyBase"></div>
+    <div id="joyStick"></div>
+  </div>
 
-    <div id="gameOverPanel" style="display:none">
-      <p id="gameOverInfo" class="ui-outline">You died.</p>
-      <div class="actions">
-        <button id="goRestartBtn" class="btn cta3d"><span>↻ Restart</span></button>
-      </div>
-    </div>
+  <!-- Mobile Controls: RIGHT = Fire -->
+  <div id="mobile-right" class="mc-wrap">
+    <button id="fireBtn" class="mc-btn" aria-label="Fire"><span>🔥</span></button>
   </div>
 </div>
 
-      </div>
-    </div>
-
-    <!-- Floating Glass Joystick (appears wherever you touch left side) -->
-    <div id="joy" class="hidden">
-      <div id="joyBase"></div>
-      <div id="joyStick"></div>
-    </div>
-
-    <!-- Mobile Controls: RIGHT = Fire -->
-    <div id="mobile-right" class="mc-wrap">
-      <button id="fireBtn" class="mc-btn" aria-label="Fire"><span>🔥</span></button>
-    </div>
-  </div>
-
 <script>
+function getFlagEmoji(cc){
+  if(!cc||cc.length!==2) return '🏳️';
+  const a=cc[0].toUpperCase().charCodeAt(0)-65+0x1F1E6;
+  const b=cc[1].toUpperCase().charCodeAt(0)-65+0x1F1E6;
+  return String.fromCodePoint(a,b);
+}
+
+
   // --- Player multi-shot based on kills ---
 let playerShots = 1; // 1 by default
 
@@ -809,6 +893,82 @@ const ENEMY_COLORS = {
 };
 // Draw one tank/ship used by player and enemies
 // x,y,size,hullAngle,wheelSpin,colors,{turretAngle}
+// ------- FLAG SPRITE LOADER (Twemoji PNG, with caching) -------
+const FLAG_SPRITE_CACHE = Object.create(null);
+
+function ccToRegionalHex(cc){
+  if(!cc || cc.length!==2) return null;
+  const A = 'A'.charCodeAt(0);
+  const cp1 = 0x1F1E6 + (cc[0].toUpperCase().charCodeAt(0) - A);
+  const cp2 = 0x1F1E6 + (cc[1].toUpperCase().charCodeAt(0) - A);
+  return cp1.toString(16) + '-' + cp2.toString(16);
+}
+
+function getFlagSprite(cc, onReady){
+  const hex = ccToRegionalHex(cc);
+  if(!hex){ onReady(null); return; }
+
+  if(FLAG_SPRITE_CACHE[hex] === 'loading'){
+    setTimeout(()=>getFlagSprite(cc, onReady), 30);
+    return;
+  }
+
+  const cached = FLAG_SPRITE_CACHE[hex];
+  if(cached && cached.complete){ onReady(cached); return; }
+
+  FLAG_SPRITE_CACHE[hex] = 'loading';
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/${hex}.png`;
+
+  img.onload = ()=>{ FLAG_SPRITE_CACHE[hex] = img; onReady(img); };
+  img.onerror = ()=>{ FLAG_SPRITE_CACHE[hex] = null; onReady(null); };
+}
+
+function paintFallbackFlagPlate(ctx, s, cc){
+  const w = s * 0.62, h = s * 0.40, r = Math.max(4, s*0.06);
+  const x = -w/2, y = -h/2;
+
+  if(!ctx.roundRect){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+    ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.stroke();
+  } else {
+    ctx.fillStyle = '#fff'; ctx.roundRect(x,y,w,h,r); ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.stroke();
+  }
+
+  ctx.fillStyle = '#d1d5db'; ctx.fillRect(x, y, w/3, h);
+  ctx.fillStyle = '#9ca3af'; ctx.fillRect(x+w/3, y, w/3, h);
+  ctx.fillStyle = '#6b7280'; ctx.fillRect(x+2*w/3, y, w/3, h);
+
+  ctx.fillStyle = '#111827';
+  ctx.font = `900 ${Math.max(12, Math.floor(s*0.18))}px system-ui, Arial`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText((cc||'--').toUpperCase(), 0, 0);
+}
+
+function drawFlagDecal(ctx, s, cc){
+  getFlagSprite(cc, (img)=>{
+    ctx.save();
+    // Bigger decal now: 0.68 x 0.44 of size (was ~0.52 x 0.34)
+    const W = s * 0.68, H = s * 0.44;
+    const x = -W/2, y = -H/2;
+    if(img){
+      ctx.shadowColor = 'rgba(0,0,0,0.30)';
+      ctx.shadowBlur = Math.max(2, s*0.06);
+      ctx.drawImage(img, x, y, W, H);
+      ctx.shadowBlur = 0;
+    }else{
+      paintFallbackFlagPlate(ctx, s, cc);
+    }
+    ctx.restore();
+  });
+}
+
 function drawTank(x, y, size, hullAngle, wheelSpin, colors, turretAngle=null){
   const s = size;
 
@@ -871,6 +1031,13 @@ function drawTank(x, y, size, hullAngle, wheelSpin, colors, turretAngle=null){
   ctx.beginPath(); ctx.ellipse(-s*0.32,-s*0.38,6,6,0,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.ellipse( s*0.32,-s*0.38,6,6,0,0,Math.PI*2); ctx.fill();
   ctx.shadowBlur=0;
+
+  // === FLAG DECAL (image, big) ===
+  const cc = (colors === PLAYER_COLORS)
+    ? (localStorage.getItem('cfc_player_flag') || 'US')
+    : (localStorage.getItem('cfc_enemy_flag')  || 'IN');
+  drawFlagDecalImage(ctx, s, cc);
+
   ctx.restore();
 
   // turret (optional)
@@ -894,6 +1061,72 @@ function drawTank(x, y, size, hullAngle, wheelSpin, colors, turretAngle=null){
     ctx.beginPath(); ctx.ellipse(s*0.70,0,s*0.06,s*0.06,0,0,Math.PI*2); ctx.fill();
     ctx.restore();
   }
+}
+
+// ---- Flag image loader (CDN) ----
+const FLAG_IMG_CACHE = new Map();
+// FlagCDN sizes: 16x12, 24x18, 32x24, 48x36, 64x48, 96x72, 160x120, 320x240
+function pickFlagBaseSize(targetPx){
+  if (targetPx <= 24)  return 24;
+  if (targetPx <= 32)  return 32;
+  if (targetPx <= 48)  return 48;
+  if (targetPx <= 64)  return 64;
+  if (targetPx <= 96)  return 96;
+  if (targetPx <= 160) return 160;
+  return 320;
+}
+function getFlagImage(cc, targetPx){
+  const code = (cc || 'US').toLowerCase();
+  const base = pickFlagBaseSize(targetPx || 64);
+  const key  = `${code}-${base}`;
+  if (FLAG_IMG_CACHE.has(key)) return FLAG_IMG_CACHE.get(key);
+
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = `https://flagcdn.com/${base}x${Math.round(base*0.75)}/${code}.png`;
+  FLAG_IMG_CACHE.set(key, img);
+  return img;
+}
+
+// ---- Draw big center decal using image; fallback to emoji if needed ----
+function drawFlagDecalImage(ctx, s, cc){
+  const decalW = s * 0.92;
+  const decalH = decalW * 0.66;
+  const img    = getFlagImage(cc, decalW);
+
+  // Ensure we repaint as soon as the image becomes ready
+  if (!img.__hooked){
+    img.__hooked = true;
+    img.onload = () => { /* RAF loop will repaint next tick */ };
+    img.onerror = () => { /* fallback will be used automatically */ };
+  }
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  if (img.complete && img.naturalWidth){
+    // soft plate behind flag for contrast
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    if (ctx.roundRect) { ctx.roundRect(-decalW/2, -decalH/2, decalW, decalH, Math.max(6, s*0.08)); ctx.fill(); }
+    else { ctx.fillRect(-decalW/2, -decalH/2, decalW, decalH); }
+    ctx.globalAlpha = 1;
+
+    ctx.drawImage(img, -decalW/2, -decalH/2, decalW, decalH);
+  } else {
+    // Fallback while loading (may show as letters on some devices)
+    const flag = getFlagEmoji(cc);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const fontPx = Math.floor(s * 0.85);
+    ctx.font = `900 ${fontPx}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui,emoji`;
+    ctx.lineWidth = Math.max(2, Math.floor(fontPx * 0.06));
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    try { ctx.strokeText(flag, 0, -s*0.02); } catch(e){}
+    ctx.fillText(flag, 0, -s*0.02);
+  }
+  ctx.restore();
 }
 
 /* =================== Enemies & Bullets (regular) =================== */
@@ -1771,6 +2004,67 @@ function updateAim(e){
   player.angle=Math.atan2(my-player.y,mx-player.x)+Math.PI/2;
 }
 canvas.addEventListener('mousemove', updateAim);
+document.addEventListener("DOMContentLoaded", () => {
+  const LS_FLAGS = { player: "cfc_player_flag", enemy: "cfc_enemy_flag", spawn: "cfc_enemy_spawn" };
+
+  // ✅ Example list (replace with full ISO list)
+  const ISO_COUNTRIES = {
+    AF:"Afghanistan", AL:"Albania", DZ:"Algeria", US:"United States", IN:"India", GB:"United Kingdom",
+    DE:"Germany", FR:"France", BR:"Brazil", JP:"Japan", CN:"China", RU:"Russia",
+    CA:"Canada", IT:"Italy", ES:"Spain", MX:"Mexico", KR:"South Korea", AU:"Australia",
+  };
+
+  function ccToFlagEmoji(cc){
+    if (!cc || cc.length !== 2) return "🏳️";
+    const a = cc[0].toUpperCase().charCodeAt(0) - 65 + 0x1F1E6;
+    const b = cc[1].toUpperCase().charCodeAt(0) - 65 + 0x1F1E6;
+    return String.fromCodePoint(a, b);
+  }
+
+  const playerFlagSel = document.getElementById("playerFlagSel");
+  const enemyFlagSel  = document.getElementById("enemyFlagSel");
+  const enemySpawnSel = document.getElementById("enemySpawnSel");
+
+  function fillFlagSelect(sel, stored){
+    if (!sel) return;
+    sel.innerHTML = "";
+    Object.entries(ISO_COUNTRIES).forEach(([code, name]) => {
+      const o = document.createElement("option");
+      o.value = code;
+      o.textContent = `${ccToFlagEmoji(code)}  ${name}`;
+      if (code === stored) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+
+  // Load from storage or defaults
+  const storedPlayer = localStorage.getItem(LS_FLAGS.player) || "US";
+  const storedEnemy  = localStorage.getItem(LS_FLAGS.enemy) || "IN";
+  const storedSpawn  = localStorage.getItem(LS_FLAGS.spawn) || "random";
+
+  fillFlagSelect(playerFlagSel, storedPlayer);
+  fillFlagSelect(enemyFlagSel, storedEnemy);
+  if (enemySpawnSel) enemySpawnSel.value = storedSpawn;
+
+  // Save changes
+  playerFlagSel?.addEventListener("change", () => {
+    localStorage.setItem(LS_FLAGS.player, playerFlagSel.value);
+  });
+  enemyFlagSel?.addEventListener("change", () => {
+    localStorage.setItem(LS_FLAGS.enemy, enemyFlagSel.value);
+  });
+  enemySpawnSel?.addEventListener("change", () => {
+    localStorage.setItem(LS_FLAGS.spawn, enemySpawnSel.value);
+  });
+});
+(function testFlag(){
+  const test = new Image();
+  test.crossOrigin = 'anonymous';
+  test.onload = () => console.log('Flag test loaded OK', test.width, test.height);
+  test.onerror = () => console.warn('Flag test failed to load');
+  test.src = 'https://flagcdn.com/64x48/us.png';
+})();
+
 </script>
 
 </body>
