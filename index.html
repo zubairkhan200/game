@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
-  <title>Car Fire Combat —ff Landscape Mobile</title>
+  <title>Tank by Tank - (BY ZUBAIR)</title>
   <style>
     :root{
       --neon:#7cf; --accent:#ff7b1f; --hud:#13b87a; --danger:#ff5454; --gold:#ffd86b;
@@ -486,6 +486,10 @@
 
           <div id="startPanel">
             <p class="ui-outline">Choose difficulty, customize, then click Start.</p>
+<label>
+  <input type="checkbox" id="flagModeToggle" checked>
+  Enable Flags
+</label>
 
             <!-- ✅ NEW: Customize row -->
             <div id="customizeRow" class="customize">
@@ -926,7 +930,7 @@ function getFlagSprite(cc, onReady){
 }
 
 function paintFallbackFlagPlate(ctx, s, cc){
-  const w = s * 0.62, h = s * 0.40, r = Math.max(4, s*0.06);
+  const w = s * 0.90, h = s * 0.60, r = Math.max(4, s*0.06);
   const x = -w/2, y = -h/2;
 
   if(!ctx.roundRect){
@@ -955,7 +959,7 @@ function drawFlagDecal(ctx, s, cc){
   getFlagSprite(cc, (img)=>{
     ctx.save();
     // Bigger decal now: 0.68 x 0.44 of size (was ~0.52 x 0.34)
-    const W = s * 0.68, H = s * 0.44;
+const W = s * 0.8, H = s * 1.5;      // <-- bigger flag
     const x = -W/2, y = -H/2;
     if(img){
       ctx.shadowColor = 'rgba(0,0,0,0.30)';
@@ -1032,11 +1036,10 @@ function drawTank(x, y, size, hullAngle, wheelSpin, colors, turretAngle=null){
   ctx.beginPath(); ctx.ellipse( s*0.32,-s*0.38,6,6,0,0,Math.PI*2); ctx.fill();
   ctx.shadowBlur=0;
 
-  // === FLAG DECAL (image, big) ===
+  // === BIG FLAG DECAL (emoji) ===
   const cc = (colors === PLAYER_COLORS)
     ? (localStorage.getItem('cfc_player_flag') || 'US')
     : (localStorage.getItem('cfc_enemy_flag')  || 'IN');
-  drawFlagDecalImage(ctx, s, cc);
 
   ctx.restore();
 
@@ -1055,6 +1058,14 @@ function drawTank(x, y, size, hullAngle, wheelSpin, colors, turretAngle=null){
     ctx.fillStyle='#0f172a';
     if(!CanvasRenderingContext2D.prototype.roundRect){ ctx.fillRect(s*0.18,-s*0.05,s*0.46,s*0.10); }
     else { ctx.roundRect(s*0.18,-s*0.05,s*0.46,s*0.10,6); ctx.fill(); }
+const flagMode = (localStorage.getItem("cfc_flag_mode") || "on") === "on";
+
+if(flagMode){
+  const cc = (colors === PLAYER_COLORS)
+    ? (localStorage.getItem('cfc_player_flag') || 'US')
+    : (localStorage.getItem('cfc_enemy_flag')  || 'IN');
+  drawFlagDecal(ctx, s, cc);
+}
 
     // muzzle glow
     ctx.fillStyle=colors.accent;
@@ -1063,71 +1074,6 @@ function drawTank(x, y, size, hullAngle, wheelSpin, colors, turretAngle=null){
   }
 }
 
-// ---- Flag image loader (CDN) ----
-const FLAG_IMG_CACHE = new Map();
-// FlagCDN sizes: 16x12, 24x18, 32x24, 48x36, 64x48, 96x72, 160x120, 320x240
-function pickFlagBaseSize(targetPx){
-  if (targetPx <= 24)  return 24;
-  if (targetPx <= 32)  return 32;
-  if (targetPx <= 48)  return 48;
-  if (targetPx <= 64)  return 64;
-  if (targetPx <= 96)  return 96;
-  if (targetPx <= 160) return 160;
-  return 320;
-}
-function getFlagImage(cc, targetPx){
-  const code = (cc || 'US').toLowerCase();
-  const base = pickFlagBaseSize(targetPx || 64);
-  const key  = `${code}-${base}`;
-  if (FLAG_IMG_CACHE.has(key)) return FLAG_IMG_CACHE.get(key);
-
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.src = `https://flagcdn.com/${base}x${Math.round(base*0.75)}/${code}.png`;
-  FLAG_IMG_CACHE.set(key, img);
-  return img;
-}
-
-// ---- Draw big center decal using image; fallback to emoji if needed ----
-function drawFlagDecalImage(ctx, s, cc){
-  const decalW = s * 0.92;
-  const decalH = decalW * 0.66;
-  const img    = getFlagImage(cc, decalW);
-
-  // Ensure we repaint as soon as the image becomes ready
-  if (!img.__hooked){
-    img.__hooked = true;
-    img.onload = () => { /* RAF loop will repaint next tick */ };
-    img.onerror = () => { /* fallback will be used automatically */ };
-  }
-
-  ctx.save();
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-
-  if (img.complete && img.naturalWidth){
-    // soft plate behind flag for contrast
-    ctx.globalAlpha = 0.85;
-    ctx.fillStyle = 'rgba(255,255,255,0.06)';
-    if (ctx.roundRect) { ctx.roundRect(-decalW/2, -decalH/2, decalW, decalH, Math.max(6, s*0.08)); ctx.fill(); }
-    else { ctx.fillRect(-decalW/2, -decalH/2, decalW, decalH); }
-    ctx.globalAlpha = 1;
-
-    ctx.drawImage(img, -decalW/2, -decalH/2, decalW, decalH);
-  } else {
-    // Fallback while loading (may show as letters on some devices)
-    const flag = getFlagEmoji(cc);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const fontPx = Math.floor(s * 0.85);
-    ctx.font = `900 ${fontPx}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui,emoji`;
-    ctx.lineWidth = Math.max(2, Math.floor(fontPx * 0.06));
-    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-    try { ctx.strokeText(flag, 0, -s*0.02); } catch(e){}
-    ctx.fillText(flag, 0, -s*0.02);
-  }
-  ctx.restore();
-}
 
 /* =================== Enemies & Bullets (regular) =================== */
 class Enemy{
@@ -2009,7 +1955,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ Example list (replace with full ISO list)
   const ISO_COUNTRIES = {
-    AF:"Afghanistan", AL:"Albania", DZ:"Algeria", US:"United States", IN:"India", GB:"United Kingdom",
+    AF:"Afghanistan", PK:"Pakistan", AL:"Albania", DZ:"Algeria", US:"United States", IN:"India", GB:"United Kingdom",
     DE:"Germany", FR:"France", BR:"Brazil", JP:"Japan", CN:"China", RU:"Russia",
     CA:"Canada", IT:"Italy", ES:"Spain", MX:"Mexico", KR:"South Korea", AU:"Australia",
   };
@@ -2057,13 +2003,19 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem(LS_FLAGS.spawn, enemySpawnSel.value);
   });
 });
-(function testFlag(){
-  const test = new Image();
-  test.crossOrigin = 'anonymous';
-  test.onload = () => console.log('Flag test loaded OK', test.width, test.height);
-  test.onerror = () => console.warn('Flag test failed to load');
-  test.src = 'https://flagcdn.com/64x48/us.png';
-})();
+const flagToggle = document.getElementById("flagModeToggle");
+const LS_FLAG_MODE = "cfc_flag_mode";
+
+// Load saved preference
+const savedMode = localStorage.getItem(LS_FLAG_MODE);
+if(savedMode !== null){
+  flagToggle.checked = savedMode === "on";
+}
+
+// Save on change
+flagToggle.addEventListener("change", ()=>{
+  localStorage.setItem(LS_FLAG_MODE, flagToggle.checked ? "on" : "off");
+});
 
 </script>
 
