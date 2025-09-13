@@ -936,93 +936,6 @@ input, input[type="checkbox"]{ display:inline-block; visibility:visible; }
     height: 23px;
     opacity: 0.5;
 }
-/* --- Gift / Reward UI --- */
-.gift-card{
-  display:flex; flex-direction:column; align-items:center; gap:.75rem;
-  padding:1rem 1.25rem; margin:.5rem auto 1rem;
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:16px;
-  box-shadow: 0 12px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
-  backdrop-filter: blur(12px) saturate(130%);
-  -webkit-backdrop-filter: blur(12px) saturate(130%);
-  width:min(420px, 92%);
-}
-
-.gift-3d{
-  position:relative; width:100px; height:86px; transform-style:preserve-3d;
-  animation: giftFloat 3s ease-in-out infinite;
-}
-@keyframes giftFloat{
-  0%,100%{ transform: translateY(0) rotateX(10deg) rotateY(-10deg); }
-  50%    { transform: translateY(-6px) rotateX(8deg) rotateY(-6deg); }
-}
-
-.gift-box, .gift-lid{
-  position:absolute; inset:auto 0 0 0; margin:auto; width:100px; border-radius:10px;
-  background:linear-gradient(180deg, #ff7b1f, #c2410c);
-  box-shadow: inset 0 6px 10px rgba(255,255,255,.18), inset 0 -8px 20px rgba(0,0,0,.35);
-}
-.gift-box{ height:66px; bottom:0; }
-.gift-lid{
-  height:26px; bottom:60px;
-  background:linear-gradient(180deg, #fb923c, #ea580c);
-  border:1px solid rgba(0,0,0,.25);
-  transform-origin:center bottom;
-  transition: transform .35s ease, box-shadow .35s ease;
-}
-.gift-bow{
-  position:absolute; width:36px; height:36px; left:50%; transform:translateX(-50%);
-  bottom:78px; border-radius:999px;
-  background:radial-gradient(circle at 35% 35%, #fff, #fde68a);
-  box-shadow: 0 6px 16px rgba(0,0,0,.35), 0 0 18px -6px rgba(255,214,94,.9);
-}
-
-/* Open state */
-.gift-card.open .gift-lid{
-  transform: translateY(-30px) rotateX(35deg);
-  box-shadow: 0 10px 28px rgba(0,0,0,.45);
-}
-
-.gift-btn{
-  min-width: 180px;
-}
-
-/* Reward amount reveal */
-.hidden{ display:none !important; }
-.gift-amount{
-  display:flex; flex-direction:column; align-items:center; gap:.25rem;
-}
-.gift-amount-burst{
-  font: 800 26px/1.1 system-ui, sans-serif;
-  color:#fffbeb; letter-spacing:.5px;
-  text-shadow: 0 2px 10px rgba(255,166,0,.65), 0 0 30px rgba(255,111,0,.35);
-  animation: popIn .35s ease both;
-}
-.gift-tip{
-  color:#cbd5e1; opacity:.85; font-size:12px;
-}
-@keyframes popIn{
-  0%{ transform:scale(.85); opacity:0 }
-  100%{ transform:scale(1); opacity:1 }
-}
-.home-coins {
-  margin: 0.75rem auto 1rem;
-  padding: 0.5rem 1rem;
-  font: 700 18px/1.3 system-ui, sans-serif;
-  color: #ffd700;
-  background: linear-gradient(145deg, rgba(255,215,0,.18), rgba(255,215,0,.05));
-  border: 1px solid rgba(255,215,0,.3);
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0,0,0,.35), inset 0 1px 3px rgba(255,255,255,.2);
-  text-align: center;
-  width: fit-content;
-}
-.home-coins span {
-  color: #fff8dc;
-  text-shadow: 0 0 8px rgba(255,215,0,.6);
-}
-
 </style>
 </head>
 <body>
@@ -1060,10 +973,6 @@ input, input[type="checkbox"]{ display:inline-block; visibility:visible; }
           <h1 id="overlayTitle" class="ui-strong">Car Fire Combat</h1>
 
           <div id="startPanel">
-            <div id="homeCoins" class="home-coins">
-  💰 Coins: <span id="homeCoinsValue">0</span>
-</div>
-
             <!-- LEVEL SELECT (locked progression 1–500) -->
 <!-- LEVEL SELECT (locked progression 1–500) -->
 <!-- LEVEL SELECT (modern glass + 3D) -->
@@ -1158,21 +1067,6 @@ input, input[type="checkbox"]{ display:inline-block; visibility:visible; }
           <!-- Level Complete Panel -->
 <div id="levelCompletePanel" style="display:none">
   <div class="lc-wrap">
-<!-- Gift box reward -->
-<div class="gift-card" id="giftCard">
-  <div class="gift-3d">
-    <div class="gift-lid"></div>
-    <div class="gift-box"></div>
-    <div class="gift-bow"></div>
-  </div>
-  <button id="openGiftBtn" class="btn cta3d gift-btn"><span>🎁 Open Gift</span></button>
-
-  <div id="giftAmountWrap" class="gift-amount hidden">
-    <div class="gift-amount-burst">+<span id="giftAmount">0</span> coins</div>
-    <small class="gift-tip">Added to your wallet</small>
-  </div>
-</div>
-
     <h2 class="lc-title ui-strong">Level Complete!</h2>
     <p class="lc-sub ui-outline">
       Level <span id="lcLevel">1</span> • Goal <span id="lcGoal">12</span> kills
@@ -1180,8 +1074,6 @@ input, input[type="checkbox"]{ display:inline-block; visibility:visible; }
     <p class="lc-time ui-outline">
       Time: <span id="lcTime">00:42</span>
     </p>
-
-
     <div class="actions">
       <button id="nextLevelBtn" class="btn cta3d"><span>➡ Next Level</span></button>
       <button id="retryLevelBtn" class="btn tile3d"><span>↻ Replay</span></button>
@@ -1207,29 +1099,8 @@ input, input[type="checkbox"]{ display:inline-block; visibility:visible; }
     <button id="fireBtn" class="mc-btn" aria-label="Fire"><span>🔥</span></button>
   </div>
 </div>
-<script>
-// ---- Coins (GLOBAL) ----
-const COINS_KEY = 'cfc_coins';
-let coins = Number(localStorage.getItem(COINS_KEY) || 0);
-
-function saveCoins(){
-  localStorage.setItem(COINS_KEY, String(coins));
-}
-
-function updateCoinsUI(){
-  const coinsEl     = document.getElementById('coins');            // in-game HUD
-  const homeCoinsEl = document.getElementById('homeCoinsValue');   // home/start panel
-  if (coinsEl)     coinsEl.textContent     = coins;
-  if (homeCoinsEl) homeCoinsEl.textContent = coins;
-}
-
-// paint once on load (works even if one of the spans isn't on this page)
-document.addEventListener('DOMContentLoaded', updateCoinsUI);
-</script>
-
 
 <script>
- 
   // === Projectile visual helper ===
 function drawFlameProjectile(x, y, vx, vy, baseSize = 8){
   const ang = Math.atan2(vy, vx);
@@ -1328,8 +1199,6 @@ nextLevelBtn?.addEventListener('click', ()=>{
   localStorage.setItem('cfc_selected_level', String(selectedStage));
   startGame(); // start next stage immediately
 });
-const openGiftBtn = document.getElementById('openGiftBtn');
-openGiftBtn?.addEventListener('click', openGift);
 
 retryLevelBtn?.addEventListener('click', ()=>{
   startGame(); // replay same stage
@@ -1410,6 +1279,7 @@ const enemiesEl=document.getElementById('enemies');
 const hpEl=document.getElementById('hp');
 const killsEl=document.getElementById('kills');
 const levelEl=document.getElementById('level');
+const coinsEl=document.getElementById('coins');
 const modeLabel=document.getElementById('modeLabel');
 const muteBtn=document.getElementById('muteBtn');
 const volSlider=document.getElementById('vol');
@@ -1485,7 +1355,7 @@ const player={ x:480, y:270, size:52, angle:0,
   vx:0, vy:0, acc:0.62, maxSpeed:5.2, friction:0.88, wheelSpin:0
 };
 
-let kills=0;
+let kills=0, coins=0;
 let bossActive=false, currentBoss=null;
 
 const FIRST_BOSS_KILLS = 15;
@@ -1524,38 +1394,6 @@ function enemyAtPoint(mx, my){
     if (Math.hypot(mx - currentBoss.x, my - currentBoss.y) <= r) return currentBoss;
   }
   return null;
-}
-let giftOpened = false;
-
-function computeGiftCoins(){
-  // Balanced: random base + tiny stage bonus.
-  const base = irand(8, 18);
-  const stageBonus = Math.floor(selectedStage / 7); // +1 per 7 stages
-  return base + stageBonus;
-}
-
-function openGift(){
-  if (giftOpened) return;
-  giftOpened = true;
-
-  // Animate lid
-  const card = document.getElementById('giftCard');
-  const amountEl = document.getElementById('giftAmount');
-  const wrapEl   = document.getElementById('giftAmountWrap');
-  card?.classList.add('open');
-
-  // Compute & apply reward
-  const amt = computeGiftCoins();
-  amountEl.textContent = String(amt);
-  wrapEl.classList.remove('hidden');
-
-  coins += amt;
-  if (coinsEl) coinsEl.textContent = coins;
-  saveCoins();
-
-  // Audio + little celebration
-  synth.coin();
-  celebrateBursts(2);
 }
 
 /* =================== Floating text =================== */
@@ -2276,9 +2114,7 @@ function update(dt){
         if(e.health<=0){
           score += isBoss ? 40 : Math.ceil(e.maxHealth*2);
           const coinGain = isBoss ? irand(8,14) : (irand(1,3) + Math.max(0, selectedStage-1));
-          coins += coinGain; 
-          saveCoins();
-updateCoinsUI();
+          coins += coinGain; coinsEl && (coinsEl.textContent=coins);
           if(!isBoss){
             kills += 1;
             killsEl && (killsEl.textContent=kills);
@@ -2416,7 +2252,7 @@ function startGame(){
 
   // --- Reset runtime state ---
   enemies = []; bullets = []; enemyBullets = []; particles = []; pickups = []; shockwaves = [];
-  score = 0; kills = 0; paused = false; gameStarted = true; screenShake = 0;
+  score = 0; kills = 0; coins = 0; paused = false; gameStarted = true; screenShake = 0;
   bossActive = false; currentBoss = null; nextBossAt = FIRST_BOSS_KILLS;
 
   // Timers / clocks
@@ -2435,6 +2271,7 @@ function startGame(){
   if (scoreEl)   scoreEl.textContent   = score;
   if (enemiesEl) enemiesEl.textContent = 0;
   if (killsEl)   killsEl.textContent   = kills;
+  if (coinsEl)   coinsEl.textContent   = coins;
   if (hpEl)      hpEl.textContent      = player.hp;
   if (levelEl)   levelEl.textContent   = String(selectedStage);
 
@@ -2562,29 +2399,19 @@ function showLevelComplete(){
   gameStarted = false;
   synth.setPaused(true);
 
-  // Update stats
+  // Fill the panel UI
   document.getElementById('lcLevel').textContent = String(selectedStage);
   document.getElementById('lcGoal').textContent  = String(currentGoal);
   const elapsed = performance.now() - levelStartTime;
-  document.getElementById('lcTime').textContent  = fmtTime(elapsed);
+  document.getElementById('lcTime').textContent = fmtTime(elapsed);
 
-  // Reset gift state for this panel
-  giftOpened = false;
-  const card = document.getElementById('giftCard');
-  const wrap = document.getElementById('giftAmountWrap');
-  if (card) card.classList.remove('open');
-  if (wrap) wrap.classList.add('hidden');
-
-  // Show panel
   hideAllPanels();
   document.getElementById('levelCompletePanel').style.display = 'block';
-  overlayTitle.textContent = 'Level Complete!';
+  overlayTitle.textContent = 'Great Job!';
   overlay.classList.remove('hidden');
 
-  // Fun flare
   celebrateBursts(4);
 }
-
 /* Stage advancement (called when kills reach goal) */
 function advanceToNextLevel(){
   // Unlock next stage (persist)
