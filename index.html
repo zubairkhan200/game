@@ -4,6 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Car Fire Combat – Responsive (Portrait + Landscape)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
 <style>
   /* ===== Root, colors, and global sizing ===== */
   :root{
@@ -229,6 +231,29 @@
     .mc-btn { --fire-size: clamp(72px, 12vh, 112px); }
   }
 </style>
+<style>
+  :root { --accent:#ff7b1f; --ink:#0b1a27; }
+  .hidden{ display:none!important; }
+
+  /* Panels */
+  #overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.35); }
+  .panel-card{ background:#fff; color:var(--ink); width:min(92vw,560px); border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,.2); padding:16px 18px; }
+  .panel-card h2{ margin:0 0 6px; font:700 22px system-ui, Arial; }
+  .muted{ opacity:.8; margin:0 0 12px; }
+
+  /* Buttons */
+  .btn{ appearance:none; border:0; padding:10px 14px; border-radius:10px; font:600 14px/1 system-ui, Arial; cursor:pointer; }
+  .btn.primary{ background:var(--accent); color:#111; box-shadow:0 6px 20px rgba(255,123,31,.35); }
+  .btn.ghost{ background:#f3f4f6; color:#111; }
+  .btn.row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px; }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  /* Gift/Lottie area */
+  #giftCard{ display:flex; align-items:center; justify-content:center; }
+  #lottieGift{ width:220px; height:220px; margin:12px auto; }
+  #giftAmountWrap{ text-align:center; font:700 24px/1.2 system-ui, Arial; margin:8px 0 2px; }
+</style>
+
 </head>
 <body>
 <div id="game-container">
@@ -346,15 +371,16 @@
           </div>
 
           <!-- Level Complete Panel -->
-          <div id="levelCompletePanel" style="display:none">
-            <div class="lc-wrap">
-              <!-- Gift box reward -->
-              <div class="gift-card" id="giftCard">
-                <div class="gift-3d">
-                  <div class="gift-lid"></div>
-                  <div class="gift-box"></div>
-                  <div class="gift-bow"></div>
-                </div>
+  <div id="levelCompletePanel" style="display:none">
+  <h2>Level Complete!</h2>
+  <p>
+    Level <span id="lcLevel">1</span> • 
+    Goal <span id="lcGoal">15</span> • 
+    Time <span id="lcTime">00:00</span>
+  </p>
+      <div class="gift-card" id="giftCard">
+                  <div id="lottieGift" style="width:200px;height:200px;margin:auto;display:none;"></div>
+
                 <button id="openGiftBtn" class="btn cta3d gift-btn"><span>🎁 Open Gift</span></button>
                 <div id="giftAmountWrap" class="gift-amount hidden">
                   <div class="gift-amount-burst">+<span id="giftAmount">0</span> coins</div>
@@ -362,7 +388,7 @@
                 </div>
               </div>
 
-              <h2 class="lc-title ui-strong">Level Complete!</h2>
+ <h2 class="lc-title ui-strong">Level Complete!</h2>
               <p class="lc-sub ui-outline">Level <span id="lcLevel">1</span> • Goal <span id="lcGoal">12</span> kills</p>
               <p class="lc-time ui-outline">Time: <span id="lcTime">00:42</span></p>
               <div class="actions">
@@ -370,8 +396,7 @@
                 <button id="retryLevelBtn" class="btn tile3d"><span>↻ Replay</span></button>
                 <button id="levelMenuBtn" class="btn tile3d"><span>☰ Menu</span></button>
               </div>
-            </div>
-          </div>
+
 
         </div>
       </div>
@@ -395,6 +420,23 @@
 
 
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+  const lottieEl = document.getElementById('lottieGift');
+  if (lottieEl) {
+    lottieEl.addEventListener('click', () => {
+      if (!giftOpened) openGift();
+    });
+  }
+});
+
+  // Movement styles
+const MOVE = {
+  STRAIGHT: 'straight',
+  WALK: 'walk',
+  ZIGZAG: 'zigzag',
+  ORBIT: 'orbit'
+};
+
 // ---- Coins (GLOBAL) ----
 const COINS_KEY = 'cfc_coins';
 let coins = Number(localStorage.getItem(COINS_KEY) || 0);
@@ -414,10 +456,8 @@ function updateCoinsUI(){
 document.addEventListener('DOMContentLoaded', updateCoinsUI);
 </script>
 
-
 <script>
- 
-  // === Projectile visual helper ===
+/* =================== Projectile visual helper =================== */
 function drawFlameProjectile(x, y, vx, vy, baseSize = 8){
   const ang = Math.atan2(vy, vx);
   const len = baseSize * 2.3;
@@ -507,25 +547,25 @@ class Synth {
     window.addEventListener('pointerdown', unlock, {once:true});
     window.addEventListener('keydown', unlock, {once:true});
     const nextLevelBtn  = document.getElementById('nextLevelBtn');
-const retryLevelBtn = document.getElementById('retryLevelBtn');
-const levelMenuBtn  = document.getElementById('levelMenuBtn');
+    const retryLevelBtn = document.getElementById('retryLevelBtn');
+    const levelMenuBtn  = document.getElementById('levelMenuBtn');
 
-nextLevelBtn?.addEventListener('click', ()=>{
-  selectedStage = Math.min(unlockedLevel, selectedStage + 1);
-  localStorage.setItem('cfc_selected_level', String(selectedStage));
-  startGame(); // start next stage immediately
-});
-const openGiftBtn = document.getElementById('openGiftBtn');
-openGiftBtn?.addEventListener('click', openGift);
+    nextLevelBtn?.addEventListener('click', ()=>{
+      selectedStage = Math.min(unlockedLevel, selectedStage + 1);
+      localStorage.setItem('cfc_selected_level', String(selectedStage));
+      startGame(); // start next stage immediately
+    });
+    const openGiftBtn = document.getElementById('openGiftBtn');
+    openGiftBtn?.addEventListener('click', openGift);
 
-retryLevelBtn?.addEventListener('click', ()=>{
-  startGame(); // replay same stage
-});
+    retryLevelBtn?.addEventListener('click', ()=>{
+      startGame(); // replay same stage
+    });
 
-levelMenuBtn?.addEventListener('click', ()=>{
-  // go back to start menu with level grid visible
-  showStart();
-});
+    levelMenuBtn?.addEventListener('click', ()=>{
+      // go back to start menu with level grid visible
+      showStart();
+    });
 
   }
   setVolume(v){ this.gain=v; if(this.master) this.master.gain.value=this.muted?0:v; }
@@ -698,13 +738,44 @@ diffButtons.forEach(b=>{
 function rand(min,max){return Math.random()*(max-min)+min}
 function irand(min,max){return Math.floor(rand(min,max+1))}
 
+/* =================== NEW: Enemy behavior knobs =================== */
+const MIN_ENEMY_SHOOT_LEVEL = 3;     // enemies won't shoot before this stage
+const SNAKE_SEGMENTS        = 10;    // body segments
+const SNAKE_SEG_SPACING     = 20;    // px between segments
+const SNAKE_BASE_SIZE       = 34;    // head size
+/* =================== Lottie: Gift animation =================== */
+let giftAnim = null;
+
+function initGiftLottie(){
+  const el = document.getElementById('lottieGift');
+  if (!el || !window.lottie) return;
+
+  giftAnim = lottie.loadAnimation({
+    container: el,
+    renderer: 'svg',
+    loop: false,
+    autoplay: false,
+    path: 'lottie.json' // <-- your Lottie JSON path
+  });
+
+  // Make sure it shows the first frame but doesn't play
+  giftAnim.addEventListener('DOMLoaded', ()=> {
+    giftAnim.goToAndStop(0, true);
+  });
+}
+
+// initialize with the rest of your DOM-ready setup
+document.addEventListener('DOMContentLoaded', initGiftLottie);
+
 /* =================== Aim helpers =================== */
 function faceTowards(x, y){ player.angle = Math.atan2(y - player.y, x - player.x) + Math.PI/2; }
 function enemyAtPoint(mx, my){
   for(let i = enemies.length - 1; i >= 0; i--){
     const e = enemies[i];
-    const r = (e.size || 40) * 0.7;
-    if (Math.hypot(mx - e.x, my - e.y) <= r) return e;
+    let ex, ey, r;
+    if(e instanceof SnakeEnemy){ ex = e.segs[0].x; ey = e.segs[0].y; r = SNAKE_BASE_SIZE*0.9; }
+    else { ex = e.x; ey = e.y; r = (e.size || 40) * 0.7; }
+    if (Math.hypot(mx - ex, my - ey) <= r) return e;
   }
   if (typeof currentBoss === 'object' && currentBoss){
     const r = currentBoss.size * 0.8;
@@ -725,22 +796,27 @@ function openGift(){
   if (giftOpened) return;
   giftOpened = true;
 
-  // Animate lid
-  const card = document.getElementById('giftCard');
   const amountEl = document.getElementById('giftAmount');
   const wrapEl   = document.getElementById('giftAmountWrap');
-  card?.classList.add('open');
+  const lottieEl = document.getElementById('lottieGift');
 
-  // Compute & apply reward
+  // Show the animation container and play
+  if (lottieEl) lottieEl.style.display = 'block';
+  if (giftAnim) {
+    giftAnim.goToAndPlay(0, true);
+  }
+
+  // Compute & apply reward (unchanged)
   const amt = computeGiftCoins();
   amountEl.textContent = String(amt);
   wrapEl.classList.remove('hidden');
 
   coins += amt;
+  const coinsEl = document.getElementById('coins');
   if (coinsEl) coinsEl.textContent = coins;
   saveCoins();
 
-  // Audio + little celebration
+  // Audio + celebration (unchanged)
   synth.coin();
   celebrateBursts(2);
 }
@@ -807,7 +883,7 @@ class Pickup{
 }
 function isOnScreen(x,y,margin=0){ return x>-margin && x<WORLD_W+margin && y>-margin && y<WORLD_H+margin; }
 
-/* =================== Tank + flags (unchanged drawing helpers) =================== */
+/* =================== Tank + flags (drawing helpers) =================== */
 const PLAYER_COLORS = { bodyA:'#475569', bodyB:'#1f2937', track:'#0f172a', accent:(getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#ff7b1f').trim() };
 const ENEMY_COLORS  = { bodyA:'#64748b', bodyB:'#334155', track:'#0f172a', accent:'#fb923c' };
 const FLAG_SPRITE_CACHE = Object.create(null);
@@ -947,41 +1023,39 @@ function drawTank(x, y, size, hullAngle, wheelSpin, colors, turretAngle=null){
   }
 }
 
-/* =================== Enemies & Bullets =================== */
-class Enemy{
+/* =================== Enemies & Bullets: NEW multi-types =================== */
+class BaseEnemy{
   constructor(){
-    this.size=rand(28,56);
-    this.maxHealth=Math.max(1,Math.ceil(this.size/10));
-    this.health=this.maxHealth;
-    const edge=Math.floor(rand(0,4));
-    if(edge===0){ this.x=-this.size; this.y=rand(0,WORLD_H);}
-    else if(edge===1){ this.x=WORLD_W+this.size; this.y=rand(0,WORLD_H);}
-    else if(edge===2){ this.x=rand(0,WORLD_W); this.y=-this.size;}
+    this.size = rand(28,56);
+    this.maxHealth = Math.max(1, Math.ceil(this.size/10));
+    this.health = this.maxHealth;
+
+    // spawn at edges
+    const edge = irand(0,3);
+    if(edge===0){ this.x=-this.size; this.y=rand(0,WORLD_H); }
+    else if(edge===1){ this.x=WORLD_W+this.size; this.y=rand(0,WORLD_H); }
+    else if(edge===2){ this.x=rand(0,WORLD_W); this.y=-this.size; }
     else { this.x=rand(0,WORLD_W); this.y=WORLD_H+this.size; }
-    this.speed=((rand(0.5,1.25)+(this.size/240))*(1+(selectedStage-1)*0.05))*0.55*DIFF.speed;
-    this.hitTimer=0; this.turretAngle=0; this.sinceShot=0;
-    const [minF,maxF]=DIFF.enemyFire;
-    this.shootDelay=rand(minF,maxF)/(1+(selectedStage-1)*0.05);
+
+    this.speed     = ((rand(0.5,1.25)+(this.size/240))*(1+(selectedStage-1)*0.05))*0.55*DIFF.speed;
+    this.turretAngle = 0;
+    this.hitTimer    = 0;
+    this.sinceShot   = 0;
+    const [minF,maxF]= DIFF.enemyFire;
+    this.shootDelay  = rand(minF,maxF)/(1+(selectedStage-1)*0.05);
   }
-  update(dt){
-    const dx=player.x-this.x, dy=player.y-this.y, d=Math.hypot(dx,dy)||1;
-    this.x+=(dx/d)*this.speed*(1+Math.sin(nowTime/300+this.size)*0.02);
-    this.y+=(dy/d)*this.speed*(1+Math.cos(nowTime/300+this.size)*0.02);
-    this.turretAngle=Math.atan2(player.y-this.y, player.x-this.x);
-    this.sinceShot+=dt;
+  tryShoot(dt){
+    if(selectedStage < MIN_ENEMY_SHOOT_LEVEL) return; // gate: no shots before level 3
+    this.sinceShot += dt;
     if(graceMs===0 && this.sinceShot>=this.shootDelay && player.alive && isOnScreen(this.x,this.y,0)){
-      this.sinceShot=0;
+      this.sinceShot = 0;
       const [minF,maxF]=DIFF.enemyFire;
-      this.shootDelay=rand(minF,maxF)/(1+(selectedStage-1)*0.05);
+      this.shootDelay = rand(minF,maxF)/(1+(selectedStage-1)*0.05);
       enemyBullets.push(new EnemyBullet(this.x,this.y,player.x,player.y,this.turretAngle));
     }
-    if(this.hitTimer>0) this.hitTimer-=dt;
   }
-  draw(){
+  drawHealth(){
     const s=this.size;
-    const enemySpin = nowTime * 0.002 * (2 + this.speed * 10);
-    const hullAngle = this.turretAngle + Math.PI/2;
-    drawTank(this.x, this.y, s, hullAngle, enemySpin, ENEMY_COLORS, this.turretAngle);
     const textScale=1+((this.hitTimer>0?0.25:0)*Math.min(1,this.hitTimer/120));
     ctx.save();
     ctx.fillStyle='#0b1a27';
@@ -991,6 +1065,222 @@ class Enemy{
     ctx.restore();
   }
 }
+
+class WalkerEnemy extends BaseEnemy{
+  constructor(style = MOVE.WALK){
+    super();
+    this.style = style;
+    this.phase = rand(0, Math.PI * 2);
+    this.bob   = 0;      // for visual bobbing in draw()
+  }
+
+  update(dt){
+    const dx = player.x - this.x, dy = player.y - this.y, d = Math.hypot(dx,dy)||1;
+    const nx = dx/d, ny = dy/d;
+
+    // defaults (old straight-ish)
+    let vx = nx * this.speed;
+    let vy = ny * this.speed;
+
+    if (this.style === MOVE.WALK){
+      // Time base for stepped gait
+      const t = nowTime * 0.008 + this.phase;
+
+      // Stride (0..1), makes forward speed pulse like footsteps
+      const stride = (Math.sin(t) + 1) * 0.5;               // 0..1
+      const stepBoost = 0.75 + 0.7 * stride;                // 0.75..1.45
+
+      // Side sway (tiny) like shoulders/hips shifting while walking
+      const sway = Math.sin(t * 2) * 0.6;                   // left/right
+      const perpX = -ny, perpY = nx;
+
+      vx = (nx * stepBoost + perpX * 0.24 * sway) * this.speed;
+      vy = (ny * stepBoost + perpY * 0.24 * sway) * this.speed;
+
+      // visual bobbing for the sprite (small up/down)
+      this.bob = Math.sin(t * 2) * 2;                       // pixels
+    } else {
+      // fallback: original mild wobble you had before
+      const wobX = Math.sin(nowTime*0.004 + this.size)*0.04;
+      const wobY = Math.cos(nowTime*0.004 + this.size)*0.04;
+      vx *= (1 + wobX);
+      vy *= (1 + wobY);
+      this.bob = 0;
+    }
+
+    this.x += vx;
+    this.y += vy;
+
+    this.turretAngle = Math.atan2(player.y - this.y, player.x - this.x);
+    this.tryShoot(dt);
+    if (this.hitTimer > 0) this.hitTimer -= dt;
+  }
+
+  draw(){
+    const s = this.size;
+    const hullAngle = this.turretAngle + Math.PI/2;
+    const spin = nowTime * 0.002 * (2 + this.speed * 10);
+
+    // Add bobbing to the rendered position
+    ctx.save();
+    ctx.translate(0, this.bob || 0);
+    drawTank(this.x, this.y, s, hullAngle, spin, ENEMY_COLORS, this.turretAngle);
+    ctx.restore();
+
+    this.drawHealth();
+  }
+}
+
+class ZigZagEnemy extends BaseEnemy{
+  constructor(){ super(); this.phase = rand(0,Math.PI*2); this.shootDelay *= 1.3; }
+  update(dt){
+    const dx=player.x-this.x, dy=player.y-this.y, d=Math.hypot(dx,dy)||1;
+    const nx = dx/d, ny = dy/d;
+    const perpX = -ny, perpY = nx;
+    const sway = Math.sin(nowTime*0.006 + this.phase) * 1.8;
+    this.x += (nx*this.speed*2) + (perpX*sway);
+    this.y += (ny*this.speed*0.9) + (perpY*sway);
+    this.turretAngle = Math.atan2(player.y-this.y, player.x-this.x);
+    this.tryShoot(dt);
+    if(this.hitTimer>0) this.hitTimer-=dt;
+  }
+  draw(){
+    const s=this.size;
+    const enemySpin = nowTime * 0.003;
+    const hullAngle = this.turretAngle + Math.PI/2;
+    drawTank(this.x, this.y, s, hullAngle, enemySpin, ENEMY_COLORS, this.turretAngle);
+    this.drawHealth();
+  }
+}
+
+class StrafeEnemy extends BaseEnemy{
+  constructor(){ super(); this.orbitDir = Math.random()<0.5 ? -1 : 1; this.shootDelay *= 0.9; }
+  update(dt){
+    const dx=player.x-this.x, dy=player.y-this.y, d=Math.hypot(dx,dy)||1;
+    const nx = dx/d, ny = dy/d;
+    const perpX = -ny * this.orbitDir, perpY = nx * this.orbitDir;
+    this.x += nx*this.speed*0.7 + perpX*this.speed*1.15;
+    this.y += ny*this.speed*0.7 + perpY*this.speed*1.15;
+    this.turretAngle = Math.atan2(player.y-this.y, player.x-this.x);
+    this.tryShoot(dt);
+    if(this.hitTimer>0) this.hitTimer-=dt;
+  }
+  draw(){
+    const s=this.size;
+    const hullAngle = this.turretAngle + Math.PI/2;
+    drawTank(this.x, this.y, s, hullAngle, nowTime*0.004, ENEMY_COLORS, this.turretAngle);
+    this.drawHealth();
+  }
+}
+
+class SnakeEnemy{
+  constructor(){
+    this.segs = [];
+    this.segSize = SNAKE_BASE_SIZE + irand(0,12);
+    this.maxHealth = 120 + selectedStage*6;
+    this.health = this.maxHealth;
+
+    // head spawn at edge
+    const edge = irand(0,3);
+    let x,y;
+    if(edge===0){ x=-this.segSize; y=rand(80,WORLD_H-80); }
+    else if(edge===1){ x=WORLD_W+this.segSize; y=rand(80,WORLD_H-80); }
+    else if(edge===2){ x=rand(80,WORLD_W-80); y=-this.segSize; }
+    else { x=rand(80,WORLD_W-80); y=WORLD_H+this.segSize; }
+
+    for(let i=0;i<SNAKE_SEGMENTS;i++){
+      this.segs.push({ x:x - i*SNAKE_SEG_SPACING, y, angle:0 });
+    }
+    this.speed = 0.85 * DIFF.speed;
+    this.wiggle = Math.random()*Math.PI*2;
+    this.hitTimer = 0;
+  }
+  update(dt){
+    const head = this.segs[0];
+    const dx = player.x - head.x, dy = player.y - head.y;
+    const d  = Math.hypot(dx,dy)||1;
+    const ang = Math.atan2(dy,dx);
+    this.wiggle += 0.02;
+    const sway = Math.sin(this.wiggle)*0.45;
+
+    head.x += Math.cos(ang + sway) * this.speed * 1.4;
+    head.y += Math.sin(ang + sway) * this.speed * 1.4;
+    head.angle = ang;
+
+    for(let i=1;i<this.segs.length;i++){
+      const prev = this.segs[i-1];
+      const seg  = this.segs[i];
+      const dx = prev.x - seg.x, dy = prev.y - seg.y;
+      const dist = Math.hypot(dx,dy)||1;
+      const need = SNAKE_SEG_SPACING;
+      const pull = (dist - need) * 0.18;
+      seg.x += (dx/dist) * pull;
+      seg.y += (dy/dist) * pull;
+      seg.angle = Math.atan2(prev.y - seg.y, prev.x - seg.x);
+    }
+
+    if(this.hitTimer>0) this.hitTimer-=dt;
+
+    // damage player on touch (head)
+    const touchR = this.segSize*0.6;
+    if(Math.hypot(player.x-head.x, player.y-head.y) < player.size*0.45 + touchR){
+      damagePlayer(2);
+    }
+  }
+  draw(){
+    for(let i=this.segs.length-1;i>=0;i--){
+      const s = this.segSize * (0.95 - i*0.02);
+      const seg = this.segs[i];
+
+      // shadow
+      ctx.save();
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.ellipse(seg.x, seg.y + s*0.45, s*0.8, s*0.35, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // body
+      ctx.save();
+      ctx.translate(seg.x, seg.y);
+      ctx.rotate(seg.angle);
+      const body = ctx.createLinearGradient(-s*0.6,-s*0.4, s*0.6,s*0.4);
+      body.addColorStop(0,'#14532d');
+      body.addColorStop(1,'#064e3b');
+      ctx.fillStyle = body;
+      if(!ctx.roundRect){ ctx.fillRect(-s*0.55,-s*0.30, s*1.10, s*0.60); }
+      else { ctx.roundRect(-s*0.55,-s*0.30, s*1.10, s*0.60, s*0.18); ctx.fill(); }
+
+      // belly stripes
+      ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+      ctx.lineWidth = Math.max(1, s*0.06);
+      ctx.beginPath();
+      for(let t=-0.4;t<=0.4;t+=0.2){
+        ctx.moveTo(-s*0.45, s*t);
+        ctx.lineTo( s*0.45, s*t*0.6);
+      }
+      ctx.stroke();
+
+      // eyes on head
+      if(i===0){
+        ctx.fillStyle='#0f172a';
+        ctx.beginPath(); ctx.ellipse(s*0.2, -s*0.2, s*0.08, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(s*0.2,  s*0.2, s*0.08, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.restore();
+    }
+    // HP text at head
+    ctx.save();
+    const head = this.segs[0];
+    ctx.fillStyle='#0b1a27';
+    ctx.font='900 22px system-ui, Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(this.health, head.x, head.y - this.segSize*0.9);
+    ctx.restore();
+  }
+}
+
 class EnemyBullet{
   constructor(x,y,tx,ty,angle){
     this.x=x; this.y=y; this.size=6; this.speed=DIFF.enemyBullet+(selectedStage-1)*0.06;
@@ -1090,7 +1380,7 @@ canvas.addEventListener('click', e=>{
   const mx = e.clientX - r.left;
   const my = e.clientY - r.top;
   const hit = enemyAtPoint(mx, my);
-  if (hit){ faceTowards(hit.x, hit.y); return; }
+  if (hit){ faceTowards(hit instanceof SnakeEnemy ? hit.segs[0].x : hit.x, hit instanceof SnakeEnemy ? hit.segs[0].y : hit.y); return; }
   shootToward(mx, my);
 });
 
@@ -1120,7 +1410,7 @@ canvas.addEventListener('pointerdown', e=>{
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
   const hit = enemyAtPoint(mx, my);
-  if (hit){ e.preventDefault(); faceTowards(hit.x, hit.y); return; }
+  if (hit){ e.preventDefault(); faceTowards(hit instanceof SnakeEnemy ? hit.segs[0].x : hit.x, hit instanceof SnakeEnemy ? hit.segs[0].y : hit.y); return; }
   if(e.pointerType==='mouse'){ return; }
   if(mx <= rect.width*0.60){
     e.preventDefault();
@@ -1170,10 +1460,11 @@ startBtn.addEventListener('click', ()=> startGame());
 
 /* ===== FIRE glass button ===== */
 let fireInterval=null;
-function fireForward(){
+function fireForward(){ 
   if(!gameStarted || paused || !player.alive) return;
   const aim = player.angle - Math.PI/2;
   const shots = playerShots;
+
   if (shots <= 1){
     const tx = player.x + Math.cos(aim)*200;
     const ty = player.y + Math.sin(aim)*200;
@@ -1181,9 +1472,11 @@ function fireForward(){
     synth.fire();
     return;
   }
+
   const TOTAL_SPREAD = Math.min(0.28, 0.10 * (shots - 1));
   const step = (shots === 1) ? 0 : (TOTAL_SPREAD / (shots - 1));
   const start = aim - TOTAL_SPREAD / 2;
+
   for (let i = 0; i < shots; i++){
     const a = start + step * i;
     const tx = player.x + Math.cos(a) * 200;
@@ -1192,6 +1485,8 @@ function fireForward(){
   }
   synth.fire();
 }
+
+/* ===== FIRE glass button wiring ===== */
 fireBtn.addEventListener('pointerdown', e=>{
   fireBtn.setPointerCapture(e.pointerId);
   fireForward();
@@ -1217,11 +1512,15 @@ muteBtn.addEventListener('click', ()=>{
 });
 volSlider.addEventListener('input', e=> synth.setVolume(parseFloat(e.target.value||'0.7')));
 
-/* =================== Loop & Update =================== */
-let last=performance.now(); let spawnTimer=0;
-function spawnInterval(){ const base=2000; return base * Math.pow(0.92, Math.max(0,selectedStage-1)) * DIFF.spawn; }
+/* =================== Loop timing =================== */
+let last=performance.now(); 
+let spawnTimer=0;
+function spawnInterval(){ 
+  const base=2000; 
+  return base * Math.pow(0.92, Math.max(0,selectedStage-1)) * DIFF.spawn; 
+}
 
-/* ======== Boss visuals (unchanged helpers) ======== */
+/* ======== Boss visuals ======== */
 const BOSS_PALETTES = {
   azure:{fuselageA:'#0ea5e9',fuselageB:'#0369a1',wing:'#075985',stripe:'#67e8f9',glow:'#22d3ee',canopy1:'rgba(200,240,255,0.4)',canopy2:'rgba(200,240,255,0.12)'},
   scarlet:{fuselageA:'#ef4444',fuselageB:'#7f1d1d',wing:'#991b1b',stripe:'#fecaca',glow:'#fca5a5',canopy1:'rgba(255,230,230,0.4)',canopy2:'rgba(255,230,230,0.12)'},
@@ -1231,37 +1530,51 @@ const BOSS_PALETTES = {
 function drawAirBoss(x, y, s, hullAngle, turretAngle, theme, t=0){
   const pulse = 0.6 + 0.4*Math.sin(t*0.006);
   const thr   = 0.75 + 0.25*Math.sin(t*0.03);
+
   ctx.save(); ctx.translate(x, y); ctx.rotate(hullAngle);
   ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(0, s*0.58, s*1.05, s*0.42, 0, 0, Math.PI*2); ctx.fill();
+
   const fus = ctx.createLinearGradient(-s*0.95, -s*0.44, s*0.95, s*0.44);
   fus.addColorStop(0, theme.fuselageA); fus.addColorStop(1, theme.fuselageB); ctx.fillStyle = fus;
-  if(!CanvasRenderingContext2D.prototype.roundRect){ ctx.beginPath(); ctx.moveTo(-s*0.9,-s*0.30); ctx.quadraticCurveTo(0,-s*0.50, s*0.75,-s*0.24); ctx.lineTo(s*0.95, 0); ctx.quadraticCurveTo(0, s*0.50, -s*0.9, s*0.30); ctx.closePath(); ctx.fill(); }
-  else { ctx.roundRect(-s*0.88, -s*0.28, s*1.76, s*0.56, s*0.22); ctx.fill(); }
+  if(!CanvasRenderingContext2D.prototype.roundRect){ 
+    ctx.beginPath(); ctx.moveTo(-s*0.9,-s*0.30); 
+    ctx.quadraticCurveTo(0,-s*0.50, s*0.75,-s*0.24); 
+    ctx.lineTo(s*0.95, 0); ctx.quadraticCurveTo(0, s*0.50, -s*0.9, s*0.30); 
+    ctx.closePath(); ctx.fill(); 
+  } else { 
+    ctx.roundRect(-s*0.88, -s*0.28, s*1.76, s*0.56, s*0.22); ctx.fill(); 
+  }
   ctx.fillStyle = theme.fuselageB; ctx.beginPath(); ctx.moveTo(s*0.95, 0); ctx.lineTo(s*1.10, -s*0.08); ctx.lineTo(s*1.10,  s*0.08); ctx.closePath(); ctx.fill();
   ctx.lineWidth = Math.max(1.5, s*0.012); ctx.strokeStyle = 'rgba(255,255,255,0.10)';
   for(let i=-3;i<=3;i++){ const yy = i*(s*0.07); ctx.beginPath(); ctx.moveTo(-s*0.65, yy); ctx.lineTo( s*0.55, yy*0.85); ctx.stroke(); }
+
   ctx.fillStyle = theme.wing;
   ctx.beginPath(); ctx.moveTo(-s*0.10, -s*0.22); ctx.lineTo(-s*1.05, -s*0.62); ctx.lineTo(-s*0.40, -s*0.04); ctx.closePath(); ctx.fill();
   ctx.beginPath(); ctx.moveTo(-s*0.10,  s*0.22); ctx.lineTo(-s*1.05,  s*0.62); ctx.lineTo(-s*0.40,  s*0.04); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = theme.fuselageB;
-  ctx.beginPath(); ctx.moveTo(-s*1.02, -s*0.62); ctx.lineTo(-s*1.18, -s*0.52); ctx.lineTo(-s*0.94, -s*0.50); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(-s*1.02,  s*0.62); ctx.lineTo(-s*1.18,  s*0.52); ctx.lineTo(-s*0.94,  s*0.50); ctx.closePath(); ctx.fill();
-  ctx.save(); ctx.rotate(-0.012); ctx.fillStyle = theme.fuselageB; ctx.beginPath(); ctx.moveTo(-s*0.78, -s*0.12); ctx.lineTo(-s*0.54,  0); ctx.lineTo(-s*0.78,  s*0.12); ctx.closePath(); ctx.fill(); ctx.restore();
+
+  ctx.save(); ctx.rotate(-0.012); ctx.fillStyle = theme.fuselageB; 
+  ctx.beginPath(); ctx.moveTo(-s*0.78, -s*0.12); ctx.lineTo(-s*0.54,  0); ctx.lineTo(-s*0.78,  s*0.12); ctx.closePath(); ctx.fill(); 
+  ctx.restore();
+
   ctx.strokeStyle = theme.stripe; ctx.lineWidth = Math.max(2, s*0.02);
   ctx.beginPath(); ctx.moveTo(-s*0.70,-s*0.14); ctx.quadraticCurveTo(0,-s*0.26, s*0.62,-s*0.18); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(-s*0.70, s*0.14); ctx.quadraticCurveTo(0, s*0.26, s*0.62, s*0.18); ctx.stroke();
+
   const glass = ctx.createLinearGradient(-s*0.12,-s*0.20, s*0.12, s*0.20);
   glass.addColorStop(0, theme.canopy1); glass.addColorStop(1, theme.canopy2);
   ctx.fillStyle = glass; ctx.beginPath(); ctx.ellipse(s*0.12, -s*0.03, s*0.34, s*0.18, 0, 0, Math.PI*2); ctx.fill();
+
   function engineGlow(ex,ey,rx,ry){
     const eg = ctx.createRadialGradient(ex,ey,0, ex,ey, rx*2.8*thr);
     eg.addColorStop(0,'#ffffff'); eg.addColorStop(0.35, theme.glow); eg.addColorStop(1,'rgba(255,255,255,0)');
     ctx.fillStyle = eg; ctx.beginPath(); ctx.ellipse(ex,ey, rx*3.2, ry*1.8, 0, 0, Math.PI*2); ctx.fill();
   }
   engineGlow(-s*0.40, -s*0.14, s*0.13, s*0.09); engineGlow(-s*0.40,  s*0.14, s*0.13, s*0.09);
+
   ctx.fillStyle = theme.stripe; ctx.beginPath(); ctx.ellipse(s*1.06, 0, s*0.045*pulse, s*0.045*pulse, 0, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
+  // Turret batteries
   ctx.save(); ctx.translate(x, y); ctx.rotate(turretAngle);
   ctx.fillStyle = '#0f172a';
   if(!CanvasRenderingContext2D.prototype.roundRect){
@@ -1280,6 +1593,7 @@ function drawAirBoss(x, y, s, hullAngle, turretAngle, theme, t=0){
   for(const m of muzzle){ ctx.beginPath(); ctx.ellipse(m.mx, m.my, s*0.05, s*0.05, 0, 0, Math.PI*2); ctx.fill(); }
   ctx.restore();
 
+  // Aura ring
   ctx.save(); ctx.translate(x, y);
   ctx.strokeStyle = (theme.glow || '#22d3ee') + '33'; ctx.lineWidth = Math.max(2, s*0.02);
   ctx.beginPath(); ctx.ellipse(0, 0, s*1.05, s*0.70, 0, 0, Math.PI*2); ctx.stroke();
@@ -1303,21 +1617,22 @@ class Boss{
     this.size=this.v.size;
     this.maxHealth = this.v.hp + Math.floor(selectedStage*3);
     this.health=this.maxHealth;
+
     const edge = irand(0,3);
     if(edge===0){ this.x=-this.size; this.y=rand(80,WORLD_H-80);}
     else if(edge===1){ this.x=WORLD_W+this.size; this.y=rand(80,WORLD_H-80);}
     else if(edge===2){ this.x=rand(80,WORLD_W-80); this.y=-this.size;}
     else { this.x=rand(80,WORLD_W-80); this.y=WORLD_H+this.size; }
+
     this.speed=this.v.speed*DIFF.speed;
     this.turretAngle=0; this.sinceShot=0; this.shootDelay=650;
-    this.ringTimer=0;
     currentBoss = this;
   }
   update(dt){
     const dx=player.x-this.x, dy=player.y-this.y, d=Math.hypot(dx,dy)||1;
     this.x+=(dx/d)*this.speed; this.y+=(dy/d)*this.speed;
     this.turretAngle=Math.atan2(player.y-this.y, player.x-this.x);
-    this.sinceShot+=dt; this.ringTimer+=dt;
+    this.sinceShot+=dt;
     if(graceMs===0 && this.sinceShot>=this.shootDelay && player.alive){
       this.sinceShot=0;
       for(let i=0;i<this.v.shots;i++){
@@ -1334,6 +1649,7 @@ class Boss{
     const s = this.size;
     const hullAngle = this.turretAngle + Math.PI/2;
     drawAirBoss(this.x, this.y, s, hullAngle, this.turretAngle, this.v.theme, nowTime);
+
     ctx.save();
     ctx.fillStyle='#0b1a27';
     ctx.font=`900 ${Math.max(24,s*0.20)}px system-ui, Arial`;
@@ -1380,7 +1696,7 @@ function drawBossHealth(){
   ctx.restore();
 }
 
-/* =================== Level progression (1–100, 15 kills per stage) =================== */
+/* =================== Level progression & UI =================== */
 const LEVELS_TOTAL = 500;
 const KILLS_PER_LEVEL = 15;
 const PER_PAGE = 9;
@@ -1393,7 +1709,6 @@ selectedStage = Math.max(1, Math.min(unlockedLevel, selectedStage));
 let currentGoal = KILLS_PER_LEVEL;
 let currentPage = Math.ceil(selectedStage / PER_PAGE) || 1;
 
-/* Build/Render paginated grid */
 function renderLevelPage(){
   if(!levelGrid) return;
   levelGrid.innerHTML = '';
@@ -1429,10 +1744,25 @@ function updateLevelHeader(){
 }
 lsPrev?.addEventListener('click', ()=>{ currentPage = currentPage>1 ? currentPage-1 : PAGES; renderLevelPage(); });
 lsNext?.addEventListener('click', ()=>{ currentPage = currentPage<PAGES ? currentPage+1 : 1; renderLevelPage(); });
-levelBackBtn?.addEventListener('click', ()=>{ /* stay in start panel; optional UX hook */ });
+levelBackBtn?.addEventListener('click', ()=>{ /* stay in start panel */ });
 levelPlayBtn?.addEventListener('click', ()=> startGame());
-
 document.addEventListener('DOMContentLoaded', ()=>{ renderLevelPage(); });
+
+/* =================== Enemy spawn picker =================== */
+function spawnEnemy(){
+  const r = Math.random();
+  if (selectedStage >= 6 && r < 0.12){
+    enemies.push(new SnakeEnemy());
+  } else if (r < 0.45){
+    // Use "walking" gait from stage 2+, straight before that
+    const style = (selectedStage >= 2) ? MOVE.WALK : MOVE.STRAIGHT;
+    enemies.push(new WalkerEnemy(style));
+  } else if (r < 0.75){
+    enemies.push(new ZigZagEnemy());
+  } else {
+    enemies.push(new StrafeEnemy());
+  }
+}
 
 /* =================== Update & Draw =================== */
 function update(dt){
@@ -1443,53 +1773,81 @@ function update(dt){
 
   handlePlayerMovement();
 
+  // Spawns
   spawnTimer += dt;
-  if(spawnTimer > spawnInterval() && !bossActive){ enemies.push(new Enemy()); spawnTimer = 0; }
-  for(let i=enemies.length-1;i>=0;i--) enemies[i].update(dt);
+  if(spawnTimer > spawnInterval() && !bossActive){ 
+    spawnEnemy(); 
+    spawnTimer = 0; 
+  }
 
-  // player bullets vs enemies
+  // Enemies update
+  for(let i=enemies.length-1;i>=0;i--) {
+    const e = enemies[i];
+    if(e.update) e.update(dt);
+  }
+
+  // player bullets vs enemies (supports Snake/Boss/normal)
   for(let i=bullets.length-1;i>=0;i--){
     const b=bullets[i];
     if(!b.update()){ bullets.splice(i,1); continue; }
     for(let j=enemies.length-1;j>=0;j--){
-      const e=enemies[j], dx=e.x-b.x, dy=e.y-b.y;
-      if(Math.hypot(dx, dy) < (e.size*0.8) + b.size){
-        e.health -= b.damage; if(e.hitTimer!==undefined) e.hitTimer=200;
-        createFloatingText(e.x+rand(-12,12), e.y+rand(-12,12), '-'+b.damage, '#0b1a27', Math.max(16,(e.size||60)*0.34), 'rgba(255,255,255,.8)');
+      const e=enemies[j];
+
+      // target point
+      let ex, ey, er;
+      if(e instanceof SnakeEnemy){
+        ex = e.segs[0].x; ey = e.segs[0].y; er = SNAKE_BASE_SIZE*0.9;
+      }else{
+        ex = e.x; ey = e.y; er = (e.size||40)*0.8;
+      }
+
+      if(Math.hypot(ex - b.x, ey - b.y) <= er + b.size){
+        e.health -= b.damage;
+        if(e.hitTimer!==undefined) e.hitTimer=200;
+
+        createFloatingText(ex+rand(-12,12), ey+rand(-12,12), '-'+b.damage,
+          '#0b1a27', (e instanceof SnakeEnemy) ? 24 : Math.max(16,(e.size||60)*0.34),
+          'rgba(255,255,255,.8)'
+        );
+
         bullets.splice(i,1);
         particles.push({ x:b.x, y:b.y, vx:rand(-1.5,1.5), vy:rand(-1.5,1.5), size:rand(2,5), life:rand(8,16), hue:rand(30,60), type:'spark' });
 
         const isBoss = e instanceof Boss;
         if(e.health<=0){
-          score += isBoss ? 40 : Math.ceil(e.maxHealth*2);
-          const coinGain = isBoss ? irand(8,14) : (irand(1,3) + Math.max(0, selectedStage-1));
+          const isSnake = (e instanceof SnakeEnemy);
+          score += isBoss ? 40 : Math.ceil((e.maxHealth||10)*0.4);
+          const coinGain = isBoss ? irand(8,14) : (isSnake ? irand(6,10) : (irand(1,3) + Math.max(0, selectedStage-1)));
           coins += coinGain; 
-          saveCoins();
-updateCoinsUI();
+          saveCoins(); 
+          updateCoinsUI();
+
           if(!isBoss){
             kills += 1;
             killsEl && (killsEl.textContent=kills);
             applyPlayerShotTier();
 
-            // === Stage goal check (15 kills) ===
             if (kills >= currentGoal && gameStarted && player.alive){
               advanceToNextLevel();
-              return; // prevent double-processing this frame
+              return; // stop frame after level advance
             }
           }
-          createFloatingText(e.x,e.y, isBoss? `+${coinGain}c BOSS` : `+${coinGain}c`, '#b45309', Math.max(20,(e.size||60)*0.40));
+
+          createFloatingText(ex, ey, isBoss? `+${coinGain}c BOSS` : `+${coinGain}c`,
+            '#b45309', (isSnake? 28 : Math.max(20,(e.size||60)*0.40)));
           synth.coin();
 
           if(isBoss){
-            for(let k=0;k<3;k++) pickups.push(new Pickup(e.x+rand(-40,40), e.y+rand(-40,40),'health'));
+            for(let k=0;k<3;k++) pickups.push(new Pickup(ex+rand(-40,40), ey+rand(-40,40),'health'));
             createFloatingText(WORLD_W/2, WORLD_H*0.25, 'BOSS DOWN', '#0b1a27', 50, 'rgba(255,255,255,.85)', 'red');
             bossActive=false; currentBoss=null;
-          }else if(Math.random()<0.28){ pickups.push(new Pickup(e.x,e.y,'health')); }
+          }else if(Math.random()<0.28){
+            pickups.push(new Pickup(ex,ey,'health'));
+          }
 
-          spawnExplosion(e.x,e.y, isBoss ? 2.2 : (1 + (e.maxHealth*0.12)));
-          enemies.splice(j,1); synth.death();
-
-          // (Removed old "every 10 kills = +1 level" to avoid conflict with stage system)
+          spawnExplosion(ex,ey, isBoss ? 2.2 : 1.4);
+          enemies.splice(j,1);
+          synth.death();
 
           if(!bossActive && kills >= nextBossAt){
             enemies.push(new Boss());
@@ -1504,9 +1862,13 @@ updateCoinsUI();
 
   // enemy bullets vs player
   for(let i=enemyBullets.length-1;i>=0;i--){
-    const eb=enemyBullets[i]; if(!eb.update()){ enemyBullets.splice(i,1); continue; }
+    const eb=enemyBullets[i]; 
+    if(!eb.update()){ enemyBullets.splice(i,1); continue; }
     const dx=player.x-eb.x, dy=player.y-eb.y;
-    if(Math.hypot(dx,dy) < player.size*0.45 + eb.size){ enemyBullets.splice(i,1); damagePlayer(1); }
+    if(Math.hypot(dx,dy) < player.size*0.45 + eb.size){ 
+      enemyBullets.splice(i,1); 
+      damagePlayer(1); 
+    }
   }
 
   // bullet vs bullet
@@ -1523,15 +1885,17 @@ updateCoinsUI();
     }
   }
 
-  // enemies touching player
+  // enemies touching player (non-snake handled here; snake did head touch in update)
   for(const e of enemies){
+    if(e instanceof SnakeEnemy) continue;
     const dx=player.x-e.x, dy=player.y-e.y;
     if(Math.hypot(dx,dy) < (e.size*0.7 + player.size*0.45)) damagePlayer(1);
   }
 
   // pickups
   for(let i=pickups.length-1;i>=0;i--){
-    const p=pickups[i]; if(!p.update(dt)){ pickups.splice(i,1); continue; }
+    const p=pickups[i]; 
+    if(!p.update(dt)){ pickups.splice(i,1); continue; }
     const dx=player.x-p.x, dy=player.y-p.y;
     if(Math.hypot(dx,dy) < player.size*0.4 + p.r){
       if(p.type==='health'){
@@ -1545,33 +1909,59 @@ updateCoinsUI();
     }
   }
 
+  // UI
   scoreEl && (scoreEl.textContent=score);
   enemiesEl && (enemiesEl.textContent=enemies.length);
+
+  // Boss spawn cadence
+  if(!bossActive && kills >= nextBossAt){
+    enemies.push(new Boss());
+    createFloatingText(WORLD_W/2, WORLD_H*0.25, 'BOSS INCOMING', '#0b1a27', 50, 'rgba(255,255,255,.85)', 'red');
+    bossActive=true;
+    nextBossAt += BOSS_INTERVAL;
+  }
 }
 
 /* Damage & Game Over */
 function damagePlayer(dmg){
   if(!player.alive) return;
   const final = Math.max(1, Math.round(dmg * DIFF.damage));
-  player.hp = Math.max(0, player.hp - final); hpEl && (hpEl.textContent = player.hp);
+  player.hp = Math.max(0, player.hp - final); 
+  hpEl && (hpEl.textContent = player.hp);
   createFloatingText(player.x, player.y - 32, `-${final}`, '#0b1a27', 24, 'rgba(255,255,255,.85)', 'red');
-  synth.hit(); screenShake = Math.max(screenShake, 6);
-  if(player.hp<=0){ player.alive=false; showGameOver(); synth.gameover(); }
+  synth.hit(); 
+  screenShake = Math.max(screenShake, 6);
+  if(player.hp<=0){ 
+    player.alive=false; 
+    showGameOver(); 
+    synth.gameover(); 
+  }
 }
 function showGameOver(){
   paused = true; gameStarted = false; synth.setPaused(true);
-  hideAllPanels(); overlayTitle.textContent='Game Over'; document.getElementById('gameOverInfo').textContent=`Kills:${kills} | Stage:${selectedStage} | Coins:${coins}`;
+  hideAllPanels(); overlayTitle.textContent='Game Over'; 
+  document.getElementById('gameOverInfo').textContent=`Kills:${kills} | Stage:${selectedStage} | Coins:${coins}`;
   gameOverPanel.style.display='block'; overlay.classList.remove('hidden');
 }
 
 /* --------- Drawing --------- */
 function draw(){
   ctx.save();
-  if(screenShake>0){ ctx.translate(rand(-screenShake,screenShake), rand(-screenShake,screenShake)); screenShake *= 0.88; if(screenShake<0.5) screenShake=0; }
+  if(screenShake>0){ 
+    ctx.translate(rand(-screenShake,screenShake), rand(-screenShake,screenShake)); 
+    screenShake *= 0.88; 
+    if(screenShake<0.5) screenShake=0; 
+  }
   drawBackground();
   if (currentBoss) drawBossHealth();
   if(player.alive) drawPlayer();
-  enemies.forEach(e=>e.draw()); bullets.forEach(b=>b.draw()); enemyBullets.forEach(eb=>eb.draw()); pickups.forEach(p=>p.draw()); drawParticles();
+
+  // draw enemies
+  for(const e of enemies){ if(e.draw) e.draw(); }
+  for(const b of bullets){ b.draw(); }
+  for(const eb of enemyBullets){ eb.draw(); }
+  for(const p of pickups){ p.draw(); }
+  drawParticles();
   ctx.restore();
 }
 function loop(t){
@@ -1583,25 +1973,39 @@ function loop(t){
 requestAnimationFrame(loop);
 
 /* =================== Start/Pause/Restart =================== */
-function hideAllPanels(){ startPanel.style.display='none'; pausePanel.style.display='none'; gameOverPanel.style.display='none'; }
-function showStart(){ hideAllPanels(); overlayTitle.textContent='Car Fire Combat'; startPanel.style.display='block'; overlay.classList.remove('hidden'); }
-function showPause(){ hideAllPanels(); overlayTitle.textContent='Paused'; pausePanel.style.display='block'; overlay.classList.remove('hidden'); }
+function hideAllPanels(){ 
+  startPanel.style.display='none'; 
+  pausePanel.style.display='none'; 
+  gameOverPanel.style.display='none'; 
+  const lc = document.getElementById('levelCompletePanel');
+  if (lc) lc.style.display='none';
+}
+function showStart(){ 
+  hideAllPanels(); 
+  overlayTitle.textContent='Car Fire Combat'; 
+  startPanel.style.display='block'; 
+  overlay.classList.remove('hidden'); 
+}
+function showPause(){ 
+  hideAllPanels(); 
+  overlayTitle.textContent='Paused'; 
+  pausePanel.style.display='block'; 
+  overlay.classList.remove('hidden'); 
+}
 
 function startGame(){
-  // --- Respect locked progression & selection ---
+  // Respect progression & selection
   selectedStage = Math.max(1, Math.min(unlockedLevel, Number(selectedStage || 1)));
   localStorage.setItem('cfc_selected_level', String(selectedStage));
 
-  // Use per-stage goal (fallback to constant if killsGoalFor isn't present)
-  currentGoal = (typeof killsGoalFor === 'function')
-    ? killsGoalFor(selectedStage)
-    : (typeof KILLS_PER_LEVEL !== 'undefined' ? KILLS_PER_LEVEL : 15);
+  // Stage goal
+  currentGoal = KILLS_PER_LEVEL;
 
-  // --- Apply difficulty ---
+  // Apply difficulty
   DIFF = {...DIFF_TABLE[selectedMode]};
   if (modeLabel) modeLabel.textContent = selectedMode;
 
-  // --- Reset runtime state ---
+  // Reset runtime state
   enemies = []; bullets = []; enemyBullets = []; particles = []; pickups = []; shockwaves = [];
   score = 0; kills = 0; paused = false; gameStarted = true; screenShake = 0;
   bossActive = false; currentBoss = null; nextBossAt = FIRST_BOSS_KILLS;
@@ -1610,14 +2014,14 @@ function startGame(){
   spawnTimer = 0;
   nowTime = 0;
   graceMs = 3000;
-  levelStartTime = performance.now(); // for Level Complete timing
+  levelStartTime = performance.now();
 
-  // --- Player ---
+  // Player
   player.x = WORLD_W/2; player.y = WORLD_H/2;
   player.vx = 0; player.vy = 0; player.wheelSpin = 0;
   player.maxHP = DIFF.playerHP; player.hp = player.maxHP; player.alive = true;
 
-  // --- UI sync ---
+  // UI sync
   joyMag = 0; joyVec.x = 0; joyVec.y = 0; hideJoy();
   if (scoreEl)   scoreEl.textContent   = score;
   if (enemiesEl) enemiesEl.textContent = 0;
@@ -1629,7 +2033,7 @@ function startGame(){
   synth.setPaused(false);
   playerShots = 1;
 
-  // Nice toast with the stage goal
+  // Toast
   createFloatingText(
     WORLD_W/2, WORLD_H*0.22,
     `Stage ${selectedStage} • Goal: ${currentGoal} Kills`,
@@ -1637,10 +2041,15 @@ function startGame(){
   );
 
   // Initial spawn
-  setTimeout(()=>{ enemies.push(new Enemy()); }, 500);
+  setTimeout(()=>{ spawnEnemy(); }, 500);
 }
 
-function togglePause(state){ if(!gameStarted) return; paused = state; synth.setPaused(state); if(paused) showPause(); else overlay.classList.add('hidden'); }
+function togglePause(state){ 
+  if(!gameStarted) return; 
+  paused = state; 
+  synth.setPaused(state); 
+  if(paused) showPause(); else overlay.classList.add('hidden'); 
+}
 function restart(){
   enemies=[]; bullets=[]; enemyBullets=[]; particles=[]; pickups=[]; shockwaves=[];
   score=0; kills=0; coins=0; paused=false; player.hp=player.maxHP; player.alive=true; screenShake=0;
@@ -1655,16 +2064,9 @@ function restart(){
   coinsEl && (coinsEl.textContent=coins);
   hpEl && (hpEl.textContent=player.hp);
   overlay.classList.add('hidden'); gameStarted=true; synth.setPaused(false);
-  setTimeout(()=>{ enemies.push(new Enemy()); }, 500);
+  setTimeout(()=>{ spawnEnemy(); }, 500);
   playerShots = 1;
 }
-
-/* Optional: mouse aim helper on desktop */
-function updateAim(e){
-  const r=canvas.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top;
-  player.angle=Math.atan2(my-player.y,mx-player.x)+Math.PI/2;
-}
-canvas.addEventListener('mousemove', updateAim);
 
 /* =================== Flags UI =================== */
 document.addEventListener("DOMContentLoaded", () => {
@@ -1709,22 +2111,19 @@ const LS_FLAG_MODE = "cfc_flag_mode";
 const savedMode = localStorage.getItem(LS_FLAG_MODE);
 if(savedMode !== null){ flagToggle.checked = savedMode === "on"; }
 flagToggle.addEventListener("change", ()=>{ localStorage.setItem(LS_FLAG_MODE, flagToggle.checked ? "on" : "off"); });
+
 /* ===== Celebration / Level Complete ===== */
 let levelStartTime = 0;
-
 function fmtTime(ms){
   const t = Math.max(0, Math.floor(ms/1000));
   const m = Math.floor(t/60).toString().padStart(2,'0');
   const s = (t%60).toString().padStart(2,'0');
   return `${m}:${s}`;
 }
-
 function celebrateBursts(n=3){
-  // spawn a few big bursts using your existing particle system
   const cx = WORLD_W/2, cy = WORLD_H/2;
   for(let i=0;i<n;i++){
     setTimeout(()=>{
-      // a richer burst than spawnExplosion: more colorful sparks
       for(let k=0;k<36;k++){
         particles.push({
           x: cx + rand(-40,40),
@@ -1743,50 +2142,47 @@ function celebrateBursts(n=3){
     }, i*260);
   }
 }
-
 function showLevelComplete(){
   paused = true;
   gameStarted = false;
   synth.setPaused(true);
 
-  // Update stats
   document.getElementById('lcLevel').textContent = String(selectedStage);
   document.getElementById('lcGoal').textContent  = String(currentGoal);
   const elapsed = performance.now() - levelStartTime;
   document.getElementById('lcTime').textContent  = fmtTime(elapsed);
 
-  // Reset gift state for this panel
+  // Reset gift state
   giftOpened = false;
-  const card = document.getElementById('giftCard');
+
+  // OLD UI reset (keep if you still show the amount)
   const wrap = document.getElementById('giftAmountWrap');
-  if (card) card.classList.remove('open');
   if (wrap) wrap.classList.add('hidden');
 
-  // Show panel
+  // NEW: reset Lottie to first frame and show container (but don't autoplay)
+  const lottieEl = document.getElementById('lottieGift');
+  if (lottieEl) lottieEl.style.display = 'block';
+  if (giftAnim) giftAnim.goToAndStop(0, true);
+
   hideAllPanels();
   document.getElementById('levelCompletePanel').style.display = 'block';
   overlayTitle.textContent = 'Level Complete!';
   overlay.classList.remove('hidden');
 
-  // Fun flare
   celebrateBursts(4);
 }
 
-/* Stage advancement (called when kills reach goal) */
 function advanceToNextLevel(){
-  // Unlock next stage (persist)
   if (unlockedLevel < LEVELS_TOTAL && unlockedLevel === selectedStage){
     unlockedLevel = Math.min(LEVELS_TOTAL, unlockedLevel + 1);
     localStorage.setItem('cfc_unlocked_level', String(unlockedLevel));
   }
-
-  // Refresh header/grid numbers
   unlockedLevelEl && (unlockedLevelEl.textContent = String(unlockedLevel));
   renderLevelPage();
-
-  // Show the "Level Complete" overlay (Next / Retry / Menu)
   showLevelComplete();
 }
+
+
 
 
 </script>
