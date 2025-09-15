@@ -162,7 +162,7 @@
   .chip.meter{ padding:7px 12px; border-radius:12px; color:#e6f3ff; font:600 13px/1 system-ui; border:1px solid rgba(255,255,255,.16); background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)), radial-gradient(120% 120% at 0 0, rgba(94,234,212,.25), transparent 60%); text-shadow: 0 1px 0 rgba(0,0,0,.2); }
   .ls-grid{ display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:12px; padding:14px 6px; }
   @media (max-width:640px){ .ls-grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
-  .ls-grid .level-btn{ position:relative; height:64px; border-radius:16px; border:1px solid rgba(255,255,255,.18); background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); color:#eaf6ff; font:800 18px/1 system-ui; letter-spacing:.4px; box-shadow: 0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25); text-shadow: 0 1px 0 rgba(0,0,0,.25); cursor:pointer; transform-style: preserve-3d; transition: transform .12s ease, box-shadow .18s ease, border-color .18s ease, background .25s ease; }
+  .ls-grid .level-btn{ position:relative; height:33px; border-radius:16px; border:1px solid rgba(255,255,255,.18); background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); color:#eaf6ff; font:800 18px/1 system-ui; letter-spacing:.4px; box-shadow: 0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25); text-shadow: 0 1px 0 rgba(0,0,0,.25); cursor:pointer; transform-style: preserve-3d; transition: transform .12s ease, box-shadow .18s ease, border-color .18s ease, background .25s ease; }
   .ls-grid .level-btn::before{ content:""; position:absolute; inset:0; border-radius:inherit; background: radial-gradient(120% 120% at 50% 0, rgba(94,234,212,.20), transparent 60%); opacity:.65; pointer-events:none; mix-blend:screen; }
   .ls-grid .level-btn:hover{ transform: translateY(-2px) perspective(600px) rotateX(3deg); box-shadow: 0 16px 36px rgba(0,0,0,.45), 0 0 22px -6px var(--neon-2); }
   .ls-grid .level-btn:active{ transform: translateY(0); }
@@ -203,7 +203,7 @@
   .gift-amount-burst{ font: 800 26px/1.1 system-ui, sans-serif; color:#fffbeb; letter-spacing:.5px; text-shadow: 0 2px 10px rgba(255,166,0,.65), 0 0 30px rgba(255,111,0,.35); animation: popIn .35s ease both; }
   .gift-tip{ color:#cbd5e1; opacity:.85; font-size:12px; }
   @keyframes popIn{ 0%{ transform:scale(.85); opacity:0 } 100%{ transform:scale(1); opacity:1 } }
-  .home-coins { margin: 0.75rem auto 1rem; padding: 0.5rem 1rem; font: 700 18px/1.3 system-ui, sans-serif; color: #ffd700; background: linear-gradient(145deg, rgba(255,215,0,.18), rgba(255,215,0,.05)); border: 1px solid rgba(255,215,0,.3); border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.35), inset 0 1px 3px rgba(255,255,255,.2); text-align: center; width: fit-content; }
+  .home-coins { font: 400 18px/1.3 system-ui, sans-serif; color: #ffd700;  border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.35), inset 0 1px 3px rgba(255,255,255,.2); text-align: center; width: fit-content; }
   .home-coins span { color: #fff8dc; text-shadow: 0 0 8px rgba(255,215,0,.6); }
 
   /* ===== Orientation-specific tweaks ===== */
@@ -287,7 +287,8 @@
     <div class="box glass">
       <div class="box glass menu3d" data-tilt>
         <div class="menu3d-inner">
-          <h1 id="overlayTitle" class="ui-strong">Car Fire Combat</h1>
+          <br>
+          <H6 id="overlayTitle" class="ui-strong">Car Fire Combat</H6>
 
           <div id="startPanel">
             <div id="homeCoins" class="home-coins">💰 Coins: <span id="homeCoinsValue">0</span></div>
@@ -310,24 +311,10 @@
                 </div>
               </div>
               <div id="levelGrid" class="ls-grid" role="grid" aria-label="Level numbers"></div>
-              <div class="ls-info" role="status" aria-live="polite">
-                <span class="badge">
-                  <svg viewBox="0 0 24 24" class="ico"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 17l-5.5 2.5 1-6.3L3 8.9 9 8z"/></svg>
-                  Selected: <span id="lsSelected">1</span>
-                </span>
-                <span class="dot">•</span>
-                <span class="badge">
-                  <svg viewBox="0 0 24 24" class="ico"><path d="M20 7l-8 10-4-5-6 8"/></svg>
-                  Goal: <span id="lsGoal">15</span> kills
-                </span>
-              </div>
+            
             </div>
 
-            <label class="switch3d">
-              <input type="checkbox" id="flagModeToggle" checked>
-              <span class="track" aria-hidden="true"></span>
-              <span class="lbl">Enable Flags</span>
-            </label>
+          
 
             <!-- Customize row -->
             <div id="customizeRow" class="customize" style="text-align:center;margin-left:auto;">
@@ -339,6 +326,11 @@
                 <span>Enemy Flag</span>
                 <select id="enemyFlagSel"></select>
               </label>
+                <label class="switch3d">
+              <input type="checkbox" id="flagModeToggle" checked>
+              <span class="track" aria-hidden="true"></span>
+              <span class="lbl">Enable Flags</span>
+            </label>
             </div>
 
             <div id="diffRow" class="tiles3d">
@@ -1699,7 +1691,7 @@ function drawBossHealth(){
 /* =================== Level progression & UI =================== */
 const LEVELS_TOTAL = 500;
 const KILLS_PER_LEVEL = 15;
-const PER_PAGE = 9;
+const PER_PAGE = 5;
 const PAGES = Math.ceil(LEVELS_TOTAL / PER_PAGE);
 
 let selectedStage = Number(localStorage.getItem('cfc_selected_level') || 1);
