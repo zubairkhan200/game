@@ -5,6 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Car Fire Combat – Responsive (Portrait + Landscape)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<style>
+  :root{
+    /* visual viewport height (updated by JS below) */
+    --vh: 1dvh;
+  }
+
+  /* Make the game & overlay always fill the visible area */
+  html, body {
+    margin:0; padding:0; height:100%;
+    background:#000;
+    touch-action: none;          /* prevents accidental scrolls during gameplay */
+    overscroll-behavior: none;
+  }
+  #game-container {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: calc(var(--vh) * 100);
+    overflow: hidden;
+    background:#000;
+  }
+  #game-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Overlay fills screen; allow scroll if content taller than screen */
+  #overlay {
+    position: fixed;
+    inset: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+    width: auto; height: auto;
+    display: none; /* your JS toggles hidden class; we’ll ensure it can scroll */
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.35);
+  }
+  #overlay:not(.hidden){ display:flex; }
+
+  /* Panel: clamp to screen and scroll internally when needed */
+  .panel-card, #levelCompletePanel {
+    max-width: min(92vw, 640px);
+    max-height: calc(var(--vh) * 100 - 32px);
+    overflow: auto;
+    border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.25);
+  }
+  /* Buttons grid in actions area wraps nicely on small heights */
+  #levelCompletePanel .actions{
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:12px;
+  }
+
+  /* Landscape-specific tweaks: slightly tighter vertical padding */
+  @media (orientation: landscape){
+    .panel-card, #levelCompletePanel{ padding:14px 16px; }
+  }
+
+  /* Rotate hint overlay (shown only in portrait by JS) */
+  #rotateHint{
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: #0b1a27;
+    color: #fff;
+    z-index: 9999;
+    text-align: center;
+    padding: 24px;
+  }
+  #rotateHint .box{
+    max-width: 520px;
+    font: 600 18px/1.4 system-ui, Arial;
+  }
+  #rotateHint .box b{ font-weight:800; }
+</style>
 
 <style>
   /* ===== Root, colors, and global sizing ===== */
@@ -189,7 +268,19 @@
   @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
   /* Gift / Reward UI */
-  .gift-card{ display:flex; flex-direction:column; align-items:center; gap:.75rem; padding:1rem 1.25rem; margin:.5rem auto 1rem; background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.14); border-radius:16px; box-shadow: 0 12px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18); backdrop-filter: blur(12px) saturate(130%); -webkit-backdrop-filter: blur(12px) saturate(130%); width:min(420px, 92%); }
+.gift-card {
+    display: flex
+;
+    align-items:center;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .03));
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .18);
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+    width: min(420px, 92%);
+}
+
   .gift-3d{ position:relative; width:100px; height:86px; transform-style:preserve-3d; animation: giftFloat 3s ease-in-out infinite; }
   @keyframes giftFloat{ 0%,100%{ transform: translateY(0) rotateX(10deg) rotateY(-10deg); } 50%{ transform: translateY(-6px) rotateX(8deg) rotateY(-6deg); } }
   .gift-box, .gift-lid{ position:absolute; inset:auto 0 0 0; margin:auto; width:100px; border-radius:10px; background:linear-gradient(180deg, #ff7b1f, #c2410c); box-shadow: inset 0 6px 10px rgba(255,255,255,.18), inset 0 -8px 20px rgba(0,0,0,.35); }
@@ -288,7 +379,7 @@
       <div class="box glass menu3d" data-tilt>
         <div class="menu3d-inner">
           <br>
-          <H6 id="overlayTitle" class="ui-strong">Car Fire Combat</H6>
+          <p id="overlayTitle" class="ui-strong">Car Fire Combat</p>
 
           <div id="startPanel">
             <div id="homeCoins" class="home-coins">💰 Coins: <span id="homeCoinsValue">0</span></div>
@@ -319,11 +410,9 @@
             <!-- Customize row -->
             <div id="customizeRow" class="customize" style="text-align:center;margin-left:auto;">
               <label class="custom-label">
-                <span>Player Flag</span>
                 <select id="playerFlagSel"></select>
               </label>
               <label class="custom-label">
-                <span>Enemy Flag</span>
                 <select id="enemyFlagSel"></select>
               </label>
                 <label class="switch3d">
@@ -364,12 +453,7 @@
 
           <!-- Level Complete Panel -->
   <div id="levelCompletePanel" style="display:none">
-  <h2>Level Complete!</h2>
-  <p>
-    Level <span id="lcLevel">1</span> • 
-    Goal <span id="lcGoal">15</span> • 
-    Time <span id="lcTime">00:00</span>
-  </p>
+
       <div class="gift-card" id="giftCard">
                   <div id="lottieGift" style="width:200px;height:200px;margin:auto;display:none;"></div>
 
@@ -380,9 +464,10 @@
                 </div>
               </div>
 
- <h2 class="lc-title ui-strong">Level Complete!</h2>
+             <div class="d" style="visibility: hidden;">
               <p class="lc-sub ui-outline">Level <span id="lcLevel">1</span> • Goal <span id="lcGoal">12</span> kills</p>
               <p class="lc-time ui-outline">Time: <span id="lcTime">00:42</span></p>
+              </div>
               <div class="actions">
                 <button id="nextLevelBtn" class="btn cta3d"><span>➡ Next Level</span></button>
                 <button id="retryLevelBtn" class="btn tile3d"><span>↻ Replay</span></button>
@@ -410,6 +495,66 @@
 </body>
 </html>
 
+<script>
+(function(){
+  const root = document.documentElement;
+  function setVH(){
+    // Use VisualViewport when available to avoid URL bar issues on Android
+    const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight) / 100;
+    root.style.setProperty('--vh', vh + 'px');
+  }
+  setVH();
+  window.addEventListener('resize', setVH);
+  window.visualViewport && window.visualViewport.addEventListener('resize', setVH);
+
+  // Show rotate hint in portrait, hide in landscape
+  const hint = document.getElementById('rotateHint');
+  function updateRotateHint(){
+    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+    hint.style.display = isPortrait ? 'flex' : 'none';
+  }
+  updateRotateHint();
+  window.addEventListener('orientationchange', () => setTimeout(updateRotateHint, 60));
+  window.addEventListener('resize', updateRotateHint);
+
+  // Try to lock orientation to landscape *after a user gesture* (Android/Chrome)
+  async function lockLandscape(){
+    try{
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock('landscape');
+      }
+    }catch(e){ /* silently ignore (iOS/Safari won't allow) */ }
+  }
+
+  // Hook your obvious user-gesture buttons to try the lock:
+  function attachLockTo(id){
+    const el = document.getElementById(id);
+    el && el.addEventListener('click', lockLandscape, { once:true });
+    el && el.addEventListener('touchend', lockLandscape, { once:true });
+  }
+  attachLockTo('startBtn');
+  attachLockTo('nextLevelBtn');
+  attachLockTo('retryLevelBtn');
+  attachLockTo('levelPlayBtn');
+
+  // OPTIONAL: go fullscreen first (often required before lock on some Androids)
+  async function requestFullscreen(){
+    const el = document.documentElement;
+    try{
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+    }catch(_){}
+  }
+  // Chain fullscreen + lock on start
+  const start = document.getElementById('startBtn');
+  if (start){
+    start.addEventListener('click', async () => {
+      await requestFullscreen();
+      await lockLandscape();
+    }, { once:true });
+  }
+})();
+</script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
