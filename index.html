@@ -4,87 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Car Fire Combat – Responsive (Portrait + Landscape)</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<style>
-  :root{
-    /* visual viewport height (updated by JS below) */
-    --vh: 1dvh;
-  }
-
-  /* Make the game & overlay always fill the visible area */
-  html, body {
-    margin:0; padding:0; height:100%;
-    background:#000;
-    touch-action: none;          /* prevents accidental scrolls during gameplay */
-    overscroll-behavior: none;
-  }
-  #game-container {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: calc(var(--vh) * 100);
-    overflow: hidden;
-    background:#000;
-  }
-  #game-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-
-  /* Overlay fills screen; allow scroll if content taller than screen */
-  #overlay {
-    position: fixed;
-    inset: env(safe-area-inset-top) env(safe-area-inset-right)
-           env(safe-area-inset-bottom) env(safe-area-inset-left);
-    width: auto; height: auto;
-    display: none; /* your JS toggles hidden class; we’ll ensure it can scroll */
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,.35);
-  }
-  #overlay:not(.hidden){ display:flex; }
-
-  /* Panel: clamp to screen and scroll internally when needed */
-  .panel-card, #levelCompletePanel {
-    max-width: min(92vw, 640px);
-    max-height: calc(var(--vh) * 100 - 32px);
-    overflow: auto;
-    border-radius: 14px;
-    box-shadow: 0 10px 40px rgba(0,0,0,.25);
-  }
-  /* Buttons grid in actions area wraps nicely on small heights */
-  #levelCompletePanel .actions{
-    display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:12px;
-  }
-
-  /* Landscape-specific tweaks: slightly tighter vertical padding */
-  @media (orientation: landscape){
-    .panel-card, #levelCompletePanel{ padding:14px 16px; }
-  }
-
-  /* Rotate hint overlay (shown only in portrait by JS) */
-  #rotateHint{
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: #0b1a27;
-    color: #fff;
-    z-index: 9999;
-    text-align: center;
-    padding: 24px;
-  }
-  #rotateHint .box{
-    max-width: 520px;
-    font: 600 18px/1.4 system-ui, Arial;
-  }
-  #rotateHint .box b{ font-weight:800; }
-</style>
-
 <style>
   /* ===== Root, colors, and global sizing ===== */
   :root{
@@ -147,9 +66,23 @@
   #vol { width: 60px; height: 12px; }
 
   /* Overlay */
-  #overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.35);backdrop-filter:blur(6px);text-align:center;z-index:20;color:#0b1a27; perspective: 1000px; }
+/* replace your current #overlay block with this */
+#overlay{
+  position: fixed;        /* was absolute */
+  inset: 0;
+  display: flex;          /* start menu visible by default */
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(6px);
+  text-align: center;
+  z-index: 20;
+  color: #0b1a27;
+  perspective: 1000px;
+}
+#overlay.hidden{ display:none; }
   #overlay.hidden{display:none}
-  #overlay .box{padding:22px 24px; min-width:300px;}
+  #overlay .box{padding:8px 5px; min-width:300px;}
   #overlay h1{margin:0 0 10px;font-size:26px;letter-spacing:.08em}
   #overlay p{margin:6px 0 16px;font-size:13px;opacity:.92}
   #overlay .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
@@ -229,7 +162,7 @@
   :root{ --glass: rgba(255,255,255,.06); --glass-2: rgba(255,255,255,.12); --ink: #0b1a27; --muted: #9fb2c6; --neon-2: #22d3ee; }
   .level-select.neo3d{ --radius: 18px; background: radial-gradient(120% 120% at 10% 10%, rgba(255,255,255,.08), rgba(255,255,255,.02) 60%) , var(--glass); backdrop-filter: blur(14px) saturate(120%); -webkit-backdrop-filter: blur(14px) saturate(120%); border: 1px solid rgba(255,255,255,.12); border-radius: var(--radius); box-shadow: 0 10px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.15), 0 0 0 1px rgba(255,255,255,.04); padding: 14px; position: relative; overflow: hidden; }
   .level-select.neo3d::before{ content:""; position:absolute; inset:-2px; background: conic-gradient(from 210deg, transparent 0 35%, var(--neon) 40%, var(--neon-2) 55%, transparent 60% 100%); filter: blur(16px) saturate(140%); opacity:.35; pointer-events:none; }
-  .ls-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 6px 12px; border-bottom: 1px dashed rgba(255,255,255,.12); }
+  .ls-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom: 1px dashed rgba(255,255,255,.12); }
   .ls-title{display:flex; align-items:center; gap:10px; color:#e6f3ff;}
   .ls-title strong{font:700 18px/1.2 system-ui,ui-sans-serif; letter-spacing:.2px;}
   .ls-header .ico{ width:20px; height:20px; fill:none; stroke:var(--neon-2); stroke-width:1.8; opacity:.9; }
@@ -241,7 +174,7 @@
   .chip.meter{ padding:7px 12px; border-radius:12px; color:#e6f3ff; font:600 13px/1 system-ui; border:1px solid rgba(255,255,255,.16); background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)), radial-gradient(120% 120% at 0 0, rgba(94,234,212,.25), transparent 60%); text-shadow: 0 1px 0 rgba(0,0,0,.2); }
   .ls-grid{ display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:12px; padding:14px 6px; }
   @media (max-width:640px){ .ls-grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
-  .ls-grid .level-btn{ position:relative; height:33px; border-radius:16px; border:1px solid rgba(255,255,255,.18); background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); color:#eaf6ff; font:800 18px/1 system-ui; letter-spacing:.4px; box-shadow: 0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25); text-shadow: 0 1px 0 rgba(0,0,0,.25); cursor:pointer; transform-style: preserve-3d; transition: transform .12s ease, box-shadow .18s ease, border-color .18s ease, background .25s ease; }
+  .ls-grid .level-btn{ position:relative; height: 32px; border-radius:16px; border:1px solid rgba(255,255,255,.18); background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); color:#eaf6ff; font:800 18px/1 system-ui; letter-spacing:.4px; box-shadow: 0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25); text-shadow: 0 1px 0 rgba(0,0,0,.25); cursor:pointer; transform-style: preserve-3d; transition: transform .12s ease, box-shadow .18s ease, border-color .18s ease, background .25s ease; }
   .ls-grid .level-btn::before{ content:""; position:absolute; inset:0; border-radius:inherit; background: radial-gradient(120% 120% at 50% 0, rgba(94,234,212,.20), transparent 60%); opacity:.65; pointer-events:none; mix-blend:screen; }
   .ls-grid .level-btn:hover{ transform: translateY(-2px) perspective(600px) rotateX(3deg); box-shadow: 0 16px 36px rgba(0,0,0,.45), 0 0 22px -6px var(--neon-2); }
   .ls-grid .level-btn:active{ transform: translateY(0); }
@@ -250,7 +183,7 @@
   .ls-grid .level-btn.locked::after{ content:""; position:absolute; inset:0; border-radius:inherit; background: repeating-linear-gradient(135deg, rgba(255,255,255,.04) 0 4px, rgba(255,255,255,0) 4px 10px); pointer-events:none; }
   .ls-grid .level-btn .lock{ position:absolute; top:8px; right:8px; width:18px; height:18px; opacity:.9; filter: drop-shadow(0 2px 4px rgba(0,0,0,.35)); }
   .ls-grid .level-btn.selected{ border-color: var(--neon-2); box-shadow: 0 18px 36px rgba(0,0,0,.5), 0 0 0 2px rgba(34,211,238,.35) inset, 0 0 22px -6px var(--neon-2); background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06)), radial-gradient(120% 120% at 50% 0, rgba(34,211,238,.25), transparent 60%); }
-  .ls-info{ display:flex; align-items:center; justify-content:center; gap:10px; padding:10px; color:#d5e9ff; border-top: 1px dashed rgba(255,255,255,.12); }
+  .ls-info{ display:none; align-items:center; justify-content:center; gap:10px; padding:10px; color:#d5e9ff; border-top: 1px dashed rgba(255,255,255,.12); }
   .ls-info .badge{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.16); box-shadow: inset 0 1px 0 rgba(255,255,255,.22); font:700 13px/1 system-ui; }
   .ls-info .badge .ico{ width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:1.8; }
   .ls-info .dot{ opacity:.5 }
@@ -264,23 +197,11 @@
   .lc-wrap { text-align:center; position:relative; overflow:hidden; }
   .lc-wrap::before{ content:""; position:absolute; inset:-2px; background: conic-gradient(from 180deg, transparent 0 35%, var(--neon) 40%, var(--neon-2) 55%, transparent 60% 100%); filter: blur(16px) saturate(140%); opacity:.35; pointer-events:none; }
   .lc-title{ font:900 22px/1.2 system-ui; margin:6px 0 6px; background: linear-gradient(90deg, #ffd88a, #fff, #ffd88a); -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 1.6s linear infinite; }
-  .lc-sub, .lc-time{ margin:4px 0; }
+  .lc-sub, .lc-time{ margin:4px 0; visibility: hidden;position: absolute;}
   @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
   /* Gift / Reward UI */
-.gift-card {
-    display: flex
-;
-    align-items:center;
-    background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .03));
-    border: 1px solid rgba(255, 255, 255, .14);
-    border-radius: 16px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .18);
-    backdrop-filter: blur(12px) saturate(130%);
-    -webkit-backdrop-filter: blur(12px) saturate(130%);
-    width: min(420px, 92%);
-}
-
+  .gift-card{ display:flex; flex-direction:column; align-items:center; gap:.75rem; padding:1rem 1.25rem; margin:.5rem auto 1rem; background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.14); border-radius:16px; box-shadow: 0 12px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18); backdrop-filter: blur(12px) saturate(130%); -webkit-backdrop-filter: blur(12px) saturate(130%); width:min(420px, 92%); }
   .gift-3d{ position:relative; width:100px; height:86px; transform-style:preserve-3d; animation: giftFloat 3s ease-in-out infinite; }
   @keyframes giftFloat{ 0%,100%{ transform: translateY(0) rotateX(10deg) rotateY(-10deg); } 50%{ transform: translateY(-6px) rotateX(8deg) rotateY(-6deg); } }
   .gift-box, .gift-lid{ position:absolute; inset:auto 0 0 0; margin:auto; width:100px; border-radius:10px; background:linear-gradient(180deg, #ff7b1f, #c2410c); box-shadow: inset 0 6px 10px rgba(255,255,255,.18), inset 0 -8px 20px rgba(0,0,0,.35); }
@@ -294,7 +215,7 @@
   .gift-amount-burst{ font: 800 26px/1.1 system-ui, sans-serif; color:#fffbeb; letter-spacing:.5px; text-shadow: 0 2px 10px rgba(255,166,0,.65), 0 0 30px rgba(255,111,0,.35); animation: popIn .35s ease both; }
   .gift-tip{ color:#cbd5e1; opacity:.85; font-size:12px; }
   @keyframes popIn{ 0%{ transform:scale(.85); opacity:0 } 100%{ transform:scale(1); opacity:1 } }
-  .home-coins { font: 400 18px/1.3 system-ui, sans-serif; color: #ffd700;  border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.35), inset 0 1px 3px rgba(255,255,255,.2); text-align: center; width: fit-content; }
+  .home-coins { margin: 0.75rem auto 1rem; padding: 0.5rem 1rem; font: 700 18px/1.3 system-ui, sans-serif; color: #ffd700; background: linear-gradient(145deg, rgba(255,215,0,.18), rgba(255,215,0,.05)); border: 1px solid rgba(255,215,0,.3); border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.35), inset 0 1px 3px rgba(255,255,255,.2); text-align: center; width: fit-content; }
   .home-coins span { color: #fff8dc; text-shadow: 0 0 8px rgba(255,215,0,.6); }
 
   /* ===== Orientation-specific tweaks ===== */
@@ -322,29 +243,6 @@
     .mc-btn { --fire-size: clamp(72px, 12vh, 112px); }
   }
 </style>
-<style>
-  :root { --accent:#ff7b1f; --ink:#0b1a27; }
-  .hidden{ display:none!important; }
-
-  /* Panels */
-  #overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.35); }
-  .panel-card{ background:#fff; color:var(--ink); width:min(92vw,560px); border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,.2); padding:16px 18px; }
-  .panel-card h2{ margin:0 0 6px; font:700 22px system-ui, Arial; }
-  .muted{ opacity:.8; margin:0 0 12px; }
-
-  /* Buttons */
-  .btn{ appearance:none; border:0; padding:10px 14px; border-radius:10px; font:600 14px/1 system-ui, Arial; cursor:pointer; }
-  .btn.primary{ background:var(--accent); color:#111; box-shadow:0 6px 20px rgba(255,123,31,.35); }
-  .btn.ghost{ background:#f3f4f6; color:#111; }
-  .btn.row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px; }
-  .btn:disabled{ opacity:.5; cursor:not-allowed; }
-
-  /* Gift/Lottie area */
-  #giftCard{ display:flex; align-items:center; justify-content:center; }
-  #lottieGift{ width:220px; height:220px; margin:12px auto; }
-  #giftAmountWrap{ text-align:center; font:700 24px/1.2 system-ui, Arial; margin:8px 0 2px; }
-</style>
-
 </head>
 <body>
 <div id="game-container">
@@ -378,11 +276,9 @@
     <div class="box glass">
       <div class="box glass menu3d" data-tilt>
         <div class="menu3d-inner">
-          <br>
-          <p id="overlayTitle" class="ui-strong">Car Fire Combat</p>
+          <h1 id="overlayTitle" class="ui-strong"></h1>
 
           <div id="startPanel">
-            <div id="homeCoins" class="home-coins">💰 Coins: <span id="homeCoinsValue">0</span></div>
 
             <!-- LEVEL SELECT (modern glass + 3D) -->
             <div id="levelSelect" class="level-select neo3d" aria-label="Level selector">
@@ -391,6 +287,8 @@
                   <svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2"/></svg>
                   <strong>Select Level</strong>
                 </div>
+            <div id="homeCoins" class="home-coins">💰 Coins: <span id="homeCoinsValue">0</span></div>
+
                 <div class="ls-pages" role="group" aria-label="Level pages">
                   <button id="lsPrev" class="chip-btn" type="button" aria-label="Previous page">
                     <svg viewBox="0 0 24 24" class="ico"><path d="M15 6l-6 6 6 6"/></svg>
@@ -402,24 +300,36 @@
                 </div>
               </div>
               <div id="levelGrid" class="ls-grid" role="grid" aria-label="Level numbers"></div>
-            
+              <div class="ls-info" role="status" aria-live="polite">
+                <span class="badge">
+                  <svg viewBox="0 0 24 24" class="ico"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 17l-5.5 2.5 1-6.3L3 8.9 9 8z"/></svg>
+                  Selected: <span id="lsSelected">1</span>
+                </span>
+                <span class="dot">•</span>
+                <span class="badge">
+                  <svg viewBox="0 0 24 24" class="ico"><path d="M20 7l-8 10-4-5-6 8"/></svg>
+                  Goal: <span id="lsGoal">15</span> kills
+                </span>
+              </div>
             </div>
 
-          
-
+        
             <!-- Customize row -->
             <div id="customizeRow" class="customize" style="text-align:center;margin-left:auto;">
               <label class="custom-label">
+                <span>Player Flag</span>
                 <select id="playerFlagSel"></select>
               </label>
               <label class="custom-label">
+                <span>Enemy Flag</span>
                 <select id="enemyFlagSel"></select>
               </label>
-                <label class="switch3d">
+                  <label class="switch3d">
               <input type="checkbox" id="flagModeToggle" checked>
               <span class="track" aria-hidden="true"></span>
               <span class="lbl">Enable Flags</span>
             </label>
+
             </div>
 
             <div id="diffRow" class="tiles3d">
@@ -445,18 +355,22 @@
           </div>
 
           <div id="gameOverPanel" style="display:none">
-            <p id="gameOverInfo" class="ui-outline">You died.</p>
+            <p id="gameOverInfo"  class="ui-outline">You died.</p>
             <div class="actions">
               <button id="goRestartBtn" class="btn cta3d"><span>↻ Restart</span></button>
             </div>
           </div>
 
           <!-- Level Complete Panel -->
-  <div id="levelCompletePanel" style="display:none">
-
-      <div class="gift-card" id="giftCard">
-                  <div id="lottieGift" style="width:200px;height:200px;margin:auto;display:none;"></div>
-
+          <div id="levelCompletePanel" style="display:none">
+            <div class="lc-wrap">
+              <!-- Gift box reward -->
+              <div class="gift-card" id="giftCard">
+                <div class="gift-3d">
+                  <div class="gift-lid"></div>
+                  <div class="gift-box"></div>
+                  <div class="gift-bow"></div>
+                </div>
                 <button id="openGiftBtn" class="btn cta3d gift-btn"><span>🎁 Open Gift</span></button>
                 <div id="giftAmountWrap" class="gift-amount hidden">
                   <div class="gift-amount-burst">+<span id="giftAmount">0</span> coins</div>
@@ -464,16 +378,16 @@
                 </div>
               </div>
 
-             <div class="d" style="visibility: hidden;">
-              <p class="lc-sub ui-outline">Level <span id="lcLevel">1</span> • Goal <span id="lcGoal">12</span> kills</p>
-              <p class="lc-time ui-outline">Time: <span id="lcTime">00:42</span></p>
-              </div>
+              <h2 class="lc-title ui-strong"></h2>
+              <p class="lc-sub ui-outline" style="visibility: none;">Level <span id="lcLevel">1</span> • Goal <span id="lcGoal">12</span> kills</p>
+              <p class="lc-time ui-outline" style="visibility: none;">Time: <span id="lcTime">00:42</span></p>
               <div class="actions">
                 <button id="nextLevelBtn" class="btn cta3d"><span>➡ Next Level</span></button>
                 <button id="retryLevelBtn" class="btn tile3d"><span>↻ Replay</span></button>
                 <button id="levelMenuBtn" class="btn tile3d"><span>☰ Menu</span></button>
               </div>
-
+            </div>
+          </div>
 
         </div>
       </div>
@@ -494,6 +408,8 @@
 </div>
 </body>
 </html>
+
+
 
 <script>
 (function(){
@@ -2323,6 +2239,7 @@ function advanceToNextLevel(){
 
 
 </script>
+
 
 </body>
 </html>
